@@ -1,0 +1,24 @@
+---
+import type { Theme } from '../data/types';
+
+interface Props {
+  theme: Theme;
+}
+
+const { theme } = Astro.props;
+const c = theme.colors;
+
+// `html:root` gana en especificidad sobre el `:root` que emite Tailwind, así que
+// estos valores del CMS siempre pisan a los de fábrica de global.css.
+const css = `html:root{
+--color-sv-jungle-deep:${c.jungleDeep};
+--color-sv-jungle:${c.jungle};
+--color-sv-lime:${c.lime};
+--color-sv-gold:${c.gold};
+--color-sv-cream:${c.cream};
+--font-heading:"${theme.fonts.heading}",ui-sans-serif,system-ui,sans-serif;
+--font-body:"${theme.fonts.body}",ui-sans-serif,system-ui,sans-serif;
+}`;
+---
+
+<style is:inline set:html={css}></style>

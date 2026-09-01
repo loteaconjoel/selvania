@@ -1,0 +1,32 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AnnouncementBar from '../components/AnnouncementBar.astro';
+import Hero from '../components/Hero.astro';
+import Blocks from '../components/Blocks.astro';
+import Footer from '../components/Footer.astro';
+import { readContent } from '../lib/content-store';
+
+// La landing se arma en el servidor para reflejar lo último guardado en el
+// panel. Se apoya en la caché de la CDN, así que en la práctica los visitantes
+// reciben una página cacheada, no un render por cada visita.
+export const prerender = false;
+
+const site = await readContent();
+
+Astro.response.headers.set(
+  'Cache-Control',
+  // La CDN la sirve hasta 60 s, y mientras revalida en segundo plano sigue
+  // devolviendo la copia vieja: los cambios del panel se ven en un minuto sin
+  // que nadie espere nunca a que la página se genere.
+  'public, max-age=0, s-maxage=60, stale-while-revalidate=600',
+);
+---
+
+<Layout site={site}>
+  {site.announcement.enabled && <AnnouncementBar html={site.announcement.html} />}
+  <main>
+    <Hero hero={site.hero} number={site.whatsapp.number} />
+    <Blocks blocks={site.blocks} number={site.whatsapp.number} />
+  </main>
+  <Footer footer={site.footer} brand={site.hero.brand} />
+</Layout>

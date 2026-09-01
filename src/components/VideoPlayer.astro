@@ -1,0 +1,94 @@
+---
+import type { VideoSource } from '../data/types';
+
+interface Props {
+  source: VideoSource;
+  poster?: string;
+  title: string;
+  /**
+   * Para el video de la cabecera. Su portada es lo primero que se ve, así que
+   * se pide de inmediato en vez de diferirla: diferir la imagen principal es
+   * justo lo que hace que la página parezca lenta al abrir.
+   */
+  priority?: boolean;
+}
+
+const { source, poster, title, priority = false } = Astro.props;
+
+// En YouTube, si no hay portada propia se usa la miniatura del propio video.
+const cover =
+  poster ??
+  (source.kind === 'youtube'
+    ? `https://i.ytimg.com/vi/${source.youtubeId}/hqdefault.jpg`
+    : undefined);
+---
+
+{/* Fachada: hasta que no se toca play no se descarga ni el reproductor de
+    YouTube ni el video propio. En móvil con datos, esto es la diferencia entre
+    una página que abre al instante y una que tarda. */}
+<div
+  data-video
+  data-kind={source.kind}
+  data-src={source.kind === 'youtube' ? source.youtubeId : source.src}
+  class="group relative aspect-video w-full cursor-pointer overflow-hidden rounded-2xl bg-sv-jungle ring-1 ring-sv-lime/20"
+>
+  {
+    cover ? (
+      <img
+        src={cover}
+        alt={title}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+        decoding="async"
+        class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+      />
+    ) : null
+  }
+  <div class="absolute inset-0 bg-sv-jungle-deep/30"></div>
+  <button type="button" aria-label={`Reproducir: ${title}`} class="absolute inset-0 grid place-items-center">
+    <span
+      class="grid h-18 w-18 place-items-center rounded-full bg-sv-lime text-sv-jungle-deep shadow-xl transition duration-200 group-hover:scale-110"
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ml-1 h-8 w-8">
+        <path d="M8 5.14v13.72L19 12 8 5.14Z"></path>
+      </svg>
+    </span>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((facade) => {
+    facade.addEventListener(
+      'click',
+      () => {
+        const { kind, src } = facade.dataset;
+        if (!src) return;
+
+        let player: HTMLElement;
+
+        if (kind === 'youtube') {
+          const iframe = document.createElement('iframe');
+          // El dominio -nocookie evita el rastreo de quien solo ve el video.
+          iframe.src = `https://www.youtube-nocookie.com/embed/${src}?autoplay=1&rel=0&modestbranding=1`;
+          iframe.title = 'Video de Selvania Park';
+          iframe.allow =
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.allowFullscreen = true;
+          player = iframe;
+        } else {
+          const video = document.createElement('video');
+          video.src = src;
+          video.controls = true;
+          video.autoplay = true;
+          video.playsInline = true;
+          player = video;
+        }
+
+        player.className = 'absolute inset-0 h-full w-full border-0 object-cover';
+        facade.replaceChildren(player);
+        facade.classList.remove('cursor-pointer', 'group');
+      },
+      { once: true },
+    );
+  });
+</script>

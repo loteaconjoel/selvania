@@ -1,0 +1,100 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { SESSION_COOKIE, adminConfig, readSession } from '../../lib/auth';
+
+export const prerender = false;
+
+// Si ya hay sesión válida, no tiene sentido mostrar el formulario.
+const token = Astro.cookies.get(SESSION_COOKIE)?.value;
+if (token && readSession(token, adminConfig().sessionSecret)) {
+  return Astro.redirect('/admin', 302);
+}
+
+const messages: Record<string, string> = {
+  credenciales: 'Usuario o contraseña incorrectos.',
+  bloqueado: 'Demasiados intentos fallidos. Espera unos minutos y vuelve a probar.',
+  salida: 'Cerraste sesión correctamente.',
+};
+
+const code = Astro.url.searchParams.get('e') ?? '';
+const message = messages[code];
+const isError = Boolean(message) && code !== 'salida';
+---
+
+<AdminLayout title="Acceso al panel">
+  <main class="grid min-h-dvh place-items-center px-4 py-12">
+    <div class="w-full max-w-sm">
+      <div class="text-center">
+        <span
+          class="inline-grid h-14 w-14 place-items-center rounded-2xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25"
+        >
+          <Icon name="llave" class="h-7 w-7" />
+        </span>
+        <h1 class="mt-5 font-heading text-2xl text-sv-cream">Panel de administración</h1>
+        <p class="mt-2 text-sm text-sv-cream/60">Selvania Park</p>
+      </div>
+
+      {
+        message && (
+          <p
+            role="status"
+            class:list={[
+              'mt-6 rounded-xl px-4 py-3 text-sm',
+              isError
+                ? 'bg-red-500/10 text-red-300 ring-1 ring-red-500/30'
+                : 'bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/30',
+            ]}
+          >
+            {message}
+          </p>
+        )
+      }
+
+      <form method="POST" action="/api/login" class="mt-6 space-y-4">
+        <div>
+          <label for="usuario" class="block text-sm font-semibold text-sv-cream/80">
+            Usuario
+          </label>
+          <input
+            id="usuario"
+            name="usuario"
+            type="text"
+            required
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            class="mt-2 w-full rounded-xl bg-sv-cream/5 px-4 py-3 text-sv-cream ring-1 ring-sv-lime/20 outline-none placeholder:text-sv-cream/30 focus:ring-2 focus:ring-sv-lime"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-semibold text-sv-cream/80">
+            Contraseña
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+            class="mt-2 w-full rounded-xl bg-sv-cream/5 px-4 py-3 text-sv-cream ring-1 ring-sv-lime/20 outline-none placeholder:text-sv-cream/30 focus:ring-2 focus:ring-sv-lime"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="min-h-13 w-full rounded-full bg-sv-lime font-heading text-base font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110 active:scale-[0.98]"
+        >
+          Entrar
+        </button>
+      </form>
+
+      <p class="mt-8 text-center text-xs text-sv-cream/40">
+        <a href="/" class="underline-offset-4 hover:text-sv-lime hover:underline">
+          Volver a la página principal
+        </a>
+      </p>
+    </div>
+  </main>
+</AdminLayout>

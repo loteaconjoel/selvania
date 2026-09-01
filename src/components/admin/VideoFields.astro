@@ -1,0 +1,52 @@
+---
+import Field from './Field.astro';
+import Select from './Select.astro';
+import type { VideoSource } from '../../data/types';
+
+interface Props {
+  /** Prefijo de los campos, para que no choquen con los de otra sección. */
+  prefix: string;
+  source: VideoSource;
+  poster?: string;
+  posterName: string;
+}
+
+const { prefix, source, poster = '', posterName } = Astro.props;
+---
+
+<div class="grid gap-4 sm:grid-cols-2">
+  <Select
+    label="Origen del video"
+    name={`${prefix}.kind`}
+    value={source.kind}
+    options={[
+      { value: 'youtube', label: 'YouTube (recomendado)' },
+      { value: 'file', label: 'Archivo subido al sitio' },
+    ]}
+    hint="YouTube no consume el ancho de banda del hosting; un archivo propio sí."
+  />
+
+  <Field
+    label="Video de YouTube"
+    name={`${prefix}.youtubeId`}
+    value={source.kind === 'youtube' ? source.youtubeId : ''}
+    placeholder="dQw4w9WgXcQ"
+    hint="Pega el ID o la URL completa; se extrae solo."
+  />
+
+  <Field
+    label="Ruta del archivo de video"
+    name={`${prefix}.src`}
+    value={source.kind === 'file' ? source.src : ''}
+    placeholder="/video/selva.mp4"
+    hint="Solo si elegiste archivo propio."
+  />
+
+  <Field
+    label="Imagen de portada"
+    name={posterName}
+    value={poster}
+    placeholder="/images/demo/valle-pichanaki.jpg"
+    hint="Lo que se ve antes de darle play. En YouTube, si la dejas vacía se usa su miniatura."
+  />
+</div>

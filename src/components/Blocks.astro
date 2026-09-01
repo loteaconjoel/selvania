@@ -1,0 +1,44 @@
+---
+import VideoBlock from './blocks/VideoBlock.astro';
+import CarouselBlock from './blocks/CarouselBlock.astro';
+import TextBlock from './blocks/TextBlock.astro';
+import MarqueeBlock from './blocks/MarqueeBlock.astro';
+import type { Block } from '../data/types';
+
+interface Props {
+  blocks: Block[];
+  number: string;
+}
+
+const { blocks, number } = Astro.props;
+
+// Las secciones ocultas desde el CMS no llegan al HTML.
+const visible = blocks.filter((block) => block.enabled);
+
+// El fondo alterna entre los dos verdes para separar una sección de la
+// siguiente. Las franjas no entran en la cuenta: tienen fondo propio y romperían
+// la alternancia de las secciones que las rodean.
+let contentIndex = 0;
+const prepared = visible.map((block) => {
+  if (block.type === 'marquee') return { block, alt: false };
+  // Empieza en oscuro para no repetir el fondo del hero.
+  const alt = contentIndex % 2 === 1;
+  contentIndex += 1;
+  return { block, alt };
+});
+---
+
+{
+  prepared.map(({ block, alt }) => {
+    switch (block.type) {
+      case 'marquee':
+        return <MarqueeBlock block={block} />;
+      case 'video':
+        return <VideoBlock block={block} number={number} alt={alt} />;
+      case 'carousel':
+        return <CarouselBlock block={block} number={number} alt={alt} />;
+      case 'text':
+        return <TextBlock block={block} number={number} alt={alt} />;
+    }
+  })
+}

@@ -1,0 +1,70 @@
+---
+import Icon from '../Icon.astro';
+import type { MarqueeBlock } from '../../data/types';
+
+interface Props {
+  block: MarqueeBlock;
+}
+
+const { block } = Astro.props;
+
+// Se renderiza la lista dos veces: cuando la pista se ha desplazado la mitad de
+// su ancho, la segunda copia está exactamente donde arrancó la primera, así que
+// el reinicio del ciclo es invisible.
+const copies = [0, 1];
+---
+
+<div
+  id={block.id}
+  data-marquee
+  class="overflow-hidden border-y border-sv-lime/20 bg-sv-jungle py-4"
+>
+  <div class="sv-marquee-track flex w-max">
+    {
+      copies.map((copy) => (
+        <ul class="flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
+          {block.items.map((item) => (
+            <li class="flex items-center gap-3 px-5">
+              <Icon name={item.icon} class="h-5 w-5 shrink-0 text-sv-lime" />
+              <span class="font-heading text-sm font-bold tracking-wider whitespace-nowrap text-sv-cream uppercase">
+                {item.text}
+              </span>
+              <span class="ml-5 h-1.5 w-1.5 rounded-full bg-sv-gold/70" aria-hidden="true" />
+            </li>
+          ))}
+        </ul>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .sv-marquee-track {
+    animation: sv-marquee 45s linear infinite;
+  }
+
+  /* Se detiene al pasar el cursor para poder leer una frase concreta. */
+  [data-marquee]:hover .sv-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes sv-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  /* Sin animación, la franja se vuelve deslizable a mano. */
+  @media (prefers-reduced-motion: reduce) {
+    .sv-marquee-track {
+      animation: none !important;
+    }
+
+    [data-marquee] {
+      overflow-x: auto;
+    }
+  }
+</style>

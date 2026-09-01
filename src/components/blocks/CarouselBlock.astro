@@ -1,0 +1,46 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+import CtaButton from '../CtaButton.astro';
+import Carousel from '../Carousel.astro';
+import type { CarouselBlock } from '../../data/types';
+
+interface Props {
+  block: CarouselBlock;
+  number: string;
+  alt: boolean;
+}
+
+const { block, number, alt } = Astro.props;
+---
+
+<section
+  id={block.id}
+  class:list={[
+    'py-16 sm:py-20 lg:py-24',
+    alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
+  ]}
+>
+  <div class="px-4 sm:px-6">
+    <div class="mx-auto max-w-6xl">
+      <SectionHeader
+        eyebrow={block.eyebrow}
+        title={block.title}
+        description={block.description}
+      />
+    </div>
+  </div>
+
+  {/* El carrusel se sale del contenedor a propósito: en móvil se ve el borde
+      de la siguiente foto, que es lo que invita a deslizar. */}
+  <div class="mt-10 pl-4 sm:mx-auto sm:max-w-6xl sm:px-6 sm:pl-6">
+    <Carousel images={block.images} label={block.title} />
+  </div>
+
+  {
+    block.cta && (
+      <div class="mt-10 flex justify-center px-4 sm:px-6">
+        <CtaButton cta={block.cta} number={number} block={false} class="w-full sm:w-auto" />
+      </div>
+    )
+  }
+</section>

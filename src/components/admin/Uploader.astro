@@ -1,0 +1,40 @@
+---
+interface Props {
+  volver: string;
+}
+
+const { volver } = Astro.props;
+---
+
+<form
+  method="POST"
+  action="/api/admin/guardar"
+  enctype="multipart/form-data"
+  class="flex flex-wrap items-center gap-3 rounded-xl bg-sv-jungle-deep/60 p-4 ring-1 ring-sv-lime/10"
+>
+  <input type="hidden" name="accion" value="imagen" />
+  <input type="hidden" name="volver" value={volver} />
+
+  <div class="min-w-0 flex-1">
+    <span class="text-xs font-semibold tracking-wide text-sv-cream/70 uppercase">
+      Subir una imagen
+    </span>
+    <input
+      type="file"
+      name="archivo"
+      accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+      required
+      class="mt-1.5 block w-full text-sm text-sv-cream/70 file:mr-3 file:rounded-full file:border-0 file:bg-sv-lime/15 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-sv-lime hover:file:bg-sv-lime/25"
+    />
+    <span class="mt-1.5 block text-xs text-sv-cream/45">
+      JPG, PNG, WebP, AVIF o GIF, hasta 8 MB. Al subirla te damos su ruta para pegarla arriba.
+    </span>
+  </div>
+
+  <button
+    type="submit"
+    class="rounded-full border border-sv-lime/35 px-4 py-2 text-sm font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+  >
+    Subir
+  </button>
+</form>

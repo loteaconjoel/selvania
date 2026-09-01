@@ -1,0 +1,52 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+import CtaButton from '../CtaButton.astro';
+import Icon from '../Icon.astro';
+import type { TextBlock } from '../../data/types';
+
+interface Props {
+  block: TextBlock;
+  number: string;
+  alt: boolean;
+}
+
+const { block, number, alt } = Astro.props;
+---
+
+<section
+  id={block.id}
+  class:list={[
+    'px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
+    alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
+  ]}
+>
+  <div class="mx-auto max-w-6xl">
+    <SectionHeader
+      eyebrow={block.eyebrow}
+      title={block.title}
+      description={block.description}
+    />
+
+    <ul class="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
+      {
+        block.bullets.map((bullet) => (
+          <li class="rounded-2xl bg-sv-cream/5 p-6 ring-1 ring-sv-lime/15">
+            <span class="grid h-11 w-11 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
+              <Icon name={bullet.icon} class="h-6 w-6" />
+            </span>
+            <h3 class="mt-4 font-heading text-lg font-bold text-sv-lime">{bullet.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-sv-cream/75">{bullet.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      block.cta && (
+        <div class="mt-10 flex justify-center">
+          <CtaButton cta={block.cta} number={number} block={false} class="w-full sm:w-auto" />
+        </div>
+      )
+    }
+  </div>
+</section>

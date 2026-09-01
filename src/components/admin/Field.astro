@@ -1,0 +1,85 @@
+---
+interface Props {
+  label: string;
+  name: string;
+  value?: string;
+  type?: 'text' | 'textarea' | 'color' | 'url' | 'number';
+  hint?: string;
+  placeholder?: string;
+  rows?: number;
+  /** Ocupa las dos columnas de la rejilla. */
+  wide?: boolean;
+}
+
+const {
+  label,
+  name,
+  value = '',
+  type = 'text',
+  hint,
+  placeholder,
+  rows = 3,
+  wide = false,
+} = Astro.props;
+
+const inputClass =
+  'mt-1.5 w-full rounded-xl bg-sv-cream/5 px-3.5 py-2.5 text-sm text-sv-cream ring-1 ring-sv-lime/20 outline-none placeholder:text-sv-cream/25 focus:ring-2 focus:ring-sv-lime';
+---
+
+<label class:list={['block', wide && 'sm:col-span-2']}>
+  <span class="text-xs font-semibold tracking-wide text-sv-cream/70 uppercase">{label}</span>
+
+  {
+    type === 'textarea' ? (
+      // set:text en vez de meter {value} entre las etiquetas: dentro de un
+      // textarea, los saltos de línea y la sangría del código formarían parte
+      // del contenido del campo.
+      <textarea
+        name={name}
+        rows={rows}
+        placeholder={placeholder}
+        class={inputClass}
+        set:text={value}
+      />
+    ) : type === 'color' ? (
+      <span class="mt-1.5 flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          class="h-11 w-14 shrink-0 cursor-pointer rounded-lg bg-transparent"
+          data-color-picker={name}
+        />
+        <input
+          type="text"
+          name={name}
+          value={value}
+          placeholder="#000000"
+          class={`${inputClass} mt-0 font-mono`}
+          data-color-text={name}
+        />
+      </span>
+    ) : (
+      <input type={type} name={name} value={value} placeholder={placeholder} class={inputClass} />
+    )
+  }
+
+  {hint && <span class="mt-1.5 block text-xs text-sv-cream/45">{hint}</span>}
+</label>
+
+<script>
+  // Mantiene sincronizados el selector de color y su campo de texto: se puede
+  // elegir con la rueda o pegar el hexadecimal de la marca.
+  document.querySelectorAll<HTMLInputElement>('[data-color-picker]').forEach((picker) => {
+    const name = picker.dataset.colorPicker;
+    const field = document.querySelector<HTMLInputElement>(`[data-color-text="${name}"]`);
+    if (!field) return;
+
+    picker.addEventListener('input', () => {
+      field.value = picker.value.toUpperCase();
+    });
+
+    field.addEventListener('input', () => {
+      if (/^#[0-9a-fA-F]{6}$/.test(field.value)) picker.value = field.value;
+    });
+  });
+</script>

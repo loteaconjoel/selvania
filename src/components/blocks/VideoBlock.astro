@@ -1,0 +1,42 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+import CtaButton from '../CtaButton.astro';
+import VideoPlayer from '../VideoPlayer.astro';
+import type { VideoBlock } from '../../data/types';
+
+interface Props {
+  block: VideoBlock;
+  number: string;
+  alt: boolean;
+}
+
+const { block, number, alt } = Astro.props;
+---
+
+<section
+  id={block.id}
+  class:list={[
+    'px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
+    alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
+  ]}
+>
+  <div class="mx-auto max-w-6xl">
+    <SectionHeader
+      eyebrow={block.eyebrow}
+      title={block.title}
+      description={block.description}
+    />
+
+    <div class="mx-auto mt-10 max-w-3xl">
+      <VideoPlayer source={block.source} poster={block.poster} title={block.title} />
+    </div>
+
+    {
+      block.cta && (
+        <div class="mt-10 flex justify-center">
+          <CtaButton cta={block.cta} number={number} block={false} class="w-full sm:w-auto" />
+        </div>
+      )
+    }
+  </div>
+</section>

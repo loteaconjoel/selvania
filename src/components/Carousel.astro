@@ -1,0 +1,119 @@
+---
+import type { Media } from '../data/types';
+
+interface Props {
+  images: Media[];
+  label: string;
+}
+
+const { images, label } = Astro.props;
+---
+
+<div
+  class="relative"
+  data-carousel
+  role="group"
+  aria-roledescription="carrusel"
+  aria-label={label}
+>
+  <div class="overflow-hidden" data-embla-viewport>
+    <div class="-ml-3 flex touch-pan-y sm:-ml-4">
+      {
+        images.map((img) => (
+          <figure class="min-w-0 shrink-0 grow-0 basis-[86%] pl-3 sm:basis-[58%] sm:pl-4 lg:basis-[42%]">
+            <div class="aspect-4/3 overflow-hidden rounded-2xl bg-sv-jungle ring-1 ring-sv-lime/20">
+              <img
+                src={img.src}
+                alt={img.alt}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+            </div>
+            {img.caption && (
+              <figcaption class="mt-3 text-center text-sm text-sv-cream/70">
+                {img.caption}
+              </figcaption>
+            )}
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-center justify-center gap-4">
+    <button
+      type="button"
+      data-embla-prev
+      aria-label="Imagen anterior"
+      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-sv-lime/40 text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+        <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <div class="flex items-center gap-2" data-embla-dots></div>
+
+    <button
+      type="button"
+      data-embla-next
+      aria-label="Imagen siguiente"
+      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-sv-lime/40 text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+        <path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  import EmblaCarousel from 'embla-carousel';
+
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const viewport = root.querySelector<HTMLElement>('[data-embla-viewport]');
+    if (!viewport) return;
+
+    const embla = EmblaCarousel(viewport, {
+      loop: true,
+      align: 'center',
+      skipSnaps: false,
+    });
+
+    root
+      .querySelector<HTMLButtonElement>('[data-embla-prev]')
+      ?.addEventListener('click', () => embla.scrollPrev());
+    root
+      .querySelector<HTMLButtonElement>('[data-embla-next]')
+      ?.addEventListener('click', () => embla.scrollNext());
+
+    const dotsNode = root.querySelector<HTMLElement>('[data-embla-dots]');
+    const dots: HTMLButtonElement[] = [];
+
+    if (dotsNode) {
+      embla.scrollSnapList().forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'h-2 w-2 rounded-full transition-all duration-200';
+        dot.setAttribute('aria-label', `Ir a la imagen ${i + 1}`);
+        dot.addEventListener('click', () => embla.scrollTo(i));
+        dotsNode.appendChild(dot);
+        dots.push(dot);
+      });
+    }
+
+    const syncDots = () => {
+      const selected = embla.selectedScrollSnap();
+      dots.forEach((dot, i) => {
+        const active = i === selected;
+        dot.classList.toggle('bg-sv-lime', active);
+        dot.classList.toggle('w-6', active);
+        dot.classList.toggle('bg-sv-cream/30', !active);
+      });
+    };
+
+    embla.on('select', syncDots);
+    syncDots();
+  });
+</script>

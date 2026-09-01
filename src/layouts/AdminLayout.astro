@@ -1,0 +1,35 @@
+---
+import '../styles/global.css';
+import ThemeStyle from '../components/ThemeStyle.astro';
+import { googleFontsUrl } from '../lib/whatsapp';
+import { readContent } from '../lib/content-store';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const site = await readContent();
+const fontsHref = googleFontsUrl(site.theme.fonts.heading, site.theme.fonts.body);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Selvania Park</title>
+    {/* El panel nunca debe aparecer en Google. */}
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={fontsHref} />
+
+    <ThemeStyle theme={site.theme} />
+  </head>
+  <body class="min-h-dvh bg-sv-jungle-deep">
+    <slot />
+  </body>
+</html>

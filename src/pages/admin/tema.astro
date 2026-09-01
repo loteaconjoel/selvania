@@ -1,0 +1,120 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Nav from '../../components/admin/Nav.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Card from '../../components/admin/Card.astro';
+import Field from '../../components/admin/Field.astro';
+import { readContent } from '../../lib/content-store';
+
+export const prerender = false;
+
+const content = await readContent();
+const { colors, fonts } = content.theme;
+
+const HERE = '/admin/tema';
+---
+
+<AdminLayout title="Tema">
+  <Nav admin={Astro.locals.admin} />
+
+  <div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <Notice />
+
+    <form method="POST" action="/api/admin/guardar" class="space-y-6">
+      <input type="hidden" name="accion" value="tema" />
+      <input type="hidden" name="volver" value={HERE} />
+
+      <Card
+        title="Colores"
+        description="Se aplican a toda la página de golpe. Los íconos y los bordes también los siguen."
+      >
+        <div class="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Verde bosque oscuro"
+            name="color.jungleDeep"
+            value={colors.jungleDeep}
+            type="color"
+            hint="Fondo principal."
+          />
+          <Field
+            label="Verde medio"
+            name="color.jungle"
+            value={colors.jungle}
+            type="color"
+            hint="Acentos, íconos y fondo de secciones alternas."
+          />
+          <Field
+            label="Verde lima neón"
+            name="color.lime"
+            value={colors.lime}
+            type="color"
+            hint="Puntos de acción: CTA, botones y resaltados."
+          />
+          <Field
+            label="Verde claro"
+            name="color.gold"
+            value={colors.gold}
+            type="color"
+            hint="Bloques de contenido y acento secundario."
+          />
+          <Field
+            label="Blanco suave"
+            name="color.cream"
+            value={colors.cream}
+            type="color"
+            hint="Texto sobre fondos oscuros."
+          />
+        </div>
+
+        <div class="mt-6 rounded-xl p-5 ring-1 ring-sv-lime/15" style={`background-color:${colors.jungle}`}>
+          <p
+            class="font-heading text-xs font-bold tracking-[0.2em] uppercase"
+            style={`color:${colors.gold}`}
+          >
+            Vista previa
+          </p>
+          <p class="mt-2 font-heading text-2xl font-extrabold" style={`color:${colors.cream}`}>
+            Así se ve <span style={`color:${colors.lime}`}>el acento</span>
+          </p>
+          <span
+            class="mt-4 inline-block rounded-full px-5 py-2.5 text-sm font-bold uppercase"
+            style={`background-color:${colors.lime};color:${colors.jungleDeep}`}
+          >
+            Un botón
+          </span>
+        </div>
+      </Card>
+
+      <Card
+        title="Tipografías"
+        description="Cualquier familia de Google Fonts, escrita igual que allí. Si el nombre no existe, se usa la tipografía del sistema."
+      >
+        <div class="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Títulos"
+            name="font.heading"
+            value={fonts.heading}
+            placeholder="Outfit"
+            hint="Ej: Outfit, Poppins, Bricolage Grotesque"
+          />
+          <Field
+            label="Texto"
+            name="font.body"
+            value={fonts.body}
+            placeholder="Inter"
+            hint="Ej: Inter, Source Sans 3, Work Sans"
+          />
+        </div>
+      </Card>
+
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="rounded-full bg-sv-lime px-7 py-3 font-heading text-sm font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110"
+        >
+          Guardar cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>

@@ -1,0 +1,168 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Nav from '../../components/admin/Nav.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Card from '../../components/admin/Card.astro';
+import { readContent } from '../../lib/content-store';
+import type { Block } from '../../data/types';
+
+export const prerender = false;
+
+const content = await readContent();
+const blocks = content.blocks;
+
+const typeLabels: Record<Block['type'], string> = {
+  video: 'Video',
+  carousel: 'Carrusel',
+  text: 'Texto con puntos',
+  marquee: 'Franja',
+};
+
+const blockName = (block: Block) => (block.type === 'marquee' ? block.label : block.title);
+
+const iconButton =
+  'grid h-9 w-9 place-items-center rounded-lg bg-sv-jungle text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:bg-sv-jungle disabled:hover:text-sv-lime';
+---
+
+<AdminLayout title="Secciones">
+  <Nav admin={Astro.locals.admin} />
+
+  <div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <Notice />
+
+    <Card
+      title="Secciones de la página"
+      description="Se muestran en este mismo orden. Puedes moverlas, ocultarlas sin borrarlas, o eliminarlas."
+    >
+      <ol class="space-y-2.5">
+        {
+          blocks.map((block, i) => (
+            <li class="rounded-xl bg-sv-jungle-deep/60 p-3.5 ring-1 ring-sv-lime/10">
+              {/* El nombre va en su propia línea: en un móvil estrecho, meterlo
+                  en la misma fila que los botones lo parte en cuatro líneas. */}
+              <div class="min-w-0">
+                <a
+                  href={`/admin/seccion/${block.id}`}
+                  class="font-semibold text-sv-cream underline-offset-4 hover:text-sv-lime hover:underline"
+                >
+                  {blockName(block)}
+                </a>
+                <p class="mt-0.5 text-xs text-sv-cream/45">
+                  {typeLabels[block.type]} · #{block.id}
+                </p>
+              </div>
+
+              <div class="mt-3 flex items-center gap-2">
+                <form method="POST" action="/api/admin/guardar">
+                  <input type="hidden" name="accion" value="mover" />
+                  <input type="hidden" name="id" value={block.id} />
+                  <input type="hidden" name="direccion" value="arriba" />
+                  <input type="hidden" name="volver" value="/admin" />
+                  <button type="submit" class={iconButton} aria-label="Subir" disabled={i === 0}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4">
+                      <path d="m5 15 7-7 7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </form>
+                <form method="POST" action="/api/admin/guardar">
+                  <input type="hidden" name="accion" value="mover" />
+                  <input type="hidden" name="id" value={block.id} />
+                  <input type="hidden" name="direccion" value="abajo" />
+                  <input type="hidden" name="volver" value="/admin" />
+                  <button
+                    type="submit"
+                    class={iconButton}
+                    aria-label="Bajar"
+                    disabled={i === blocks.length - 1}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4">
+                      <path d="m5 9 7 7 7-7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </form>
+
+                <span class="flex-1"></span>
+
+                <form method="POST" action="/api/admin/guardar" class="shrink-0">
+                <input type="hidden" name="accion" value="visibilidad" />
+                <input type="hidden" name="id" value={block.id} />
+                <input type="hidden" name="volver" value="/admin" />
+                <button
+                  type="submit"
+                  class:list={[
+                    'rounded-full px-3 py-1.5 text-xs font-semibold transition',
+                    block.enabled
+                      ? 'bg-sv-lime/15 text-sv-lime hover:bg-sv-lime/25'
+                      : 'bg-sv-cream/10 text-sv-cream/50 hover:bg-sv-cream/20',
+                  ]}
+                >
+                  {block.enabled ? 'Visible' : 'Oculta'}
+                </button>
+              </form>
+
+              <a
+                href={`/admin/seccion/${block.id}`}
+                class="shrink-0 rounded-full border border-sv-lime/35 px-3.5 py-1.5 text-xs font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+              >
+                Editar
+              </a>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <form method="POST" action="/api/admin/guardar" class="mt-6 flex flex-wrap items-end gap-3">
+        <input type="hidden" name="accion" value="nuevo" />
+        <input type="hidden" name="volver" value="/admin" />
+        <label class="flex-1">
+          <span class="text-xs font-semibold tracking-wide text-sv-cream/70 uppercase">
+            Añadir sección
+          </span>
+          <select
+            name="tipo"
+            class="mt-1.5 w-full rounded-xl bg-sv-cream/5 px-3.5 py-2.5 text-sm text-sv-cream ring-1 ring-sv-lime/20 outline-none focus:ring-2 focus:ring-sv-lime"
+          >
+            <option value="carousel">Carrusel de imágenes</option>
+            <option value="video">Video</option>
+            <option value="text">Texto con puntos</option>
+            <option value="marquee">Franja en movimiento</option>
+          </select>
+        </label>
+        <button
+          type="submit"
+          class="rounded-full bg-sv-lime px-5 py-2.5 text-sm font-bold text-sv-jungle-deep uppercase transition hover:brightness-110"
+        >
+          Crear
+        </button>
+      </form>
+    </Card>
+
+    <Card title="Contenido de fábrica" description="Solo si quieres empezar de cero.">
+      <details class="group">
+        <summary
+          class="w-fit cursor-pointer list-none rounded-full border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
+        >
+          Restablecer todo el contenido
+        </summary>
+        <div class="mt-4 rounded-xl bg-red-500/5 p-4 ring-1 ring-red-500/20">
+          <p class="text-sm text-sv-cream/75">
+            Esto descarta <strong>todos</strong> los textos, imágenes, colores y secciones
+            que hayas guardado, y vuelve al contenido con el que se entregó la página.
+            No se puede deshacer.
+          </p>
+          <form method="POST" action="/api/admin/guardar" class="mt-4">
+            <input type="hidden" name="accion" value="restablecer" />
+            <input type="hidden" name="volver" value="/admin" />
+            <button
+              type="submit"
+              class="rounded-full bg-red-500/80 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+            >
+              Sí, restablecer
+            </button>
+          </form>
+        </div>
+      </details>
+    </Card>
+  </div>
+</AdminLayout>

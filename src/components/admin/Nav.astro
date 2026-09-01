@@ -1,0 +1,62 @@
+---
+interface Props {
+  admin?: string;
+}
+
+const { admin } = Astro.props;
+const path = Astro.url.pathname;
+
+const links = [
+  { href: '/admin', label: 'Secciones' },
+  { href: '/admin/general', label: 'General' },
+  { href: '/admin/tema', label: 'Tema' },
+];
+
+const isActive = (href: string) => (href === '/admin' ? path === '/admin' : path.startsWith(href));
+---
+
+<header class="border-b border-sv-lime/15 bg-sv-jungle-deep/80">
+  <div class="mx-auto flex max-w-4xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6">
+    <a href="/admin" class="font-heading text-sm font-bold tracking-wide text-sv-lime uppercase">
+      Selvania Park
+    </a>
+
+    <nav class="flex flex-1 flex-wrap gap-1">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class:list={[
+              'rounded-full px-3.5 py-1.5 text-sm font-semibold transition',
+              isActive(link.href)
+                ? 'bg-sv-lime text-sv-jungle-deep'
+                : 'text-sv-cream/70 hover:bg-sv-cream/10 hover:text-sv-cream',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener"
+        class="text-xs text-sv-cream/50 underline-offset-4 hover:text-sv-lime hover:underline"
+      >
+        Ver la web
+      </a>
+      <form method="POST" action="/api/logout">
+        <button
+          type="submit"
+          class="rounded-full border border-sv-lime/35 px-3.5 py-1.5 text-xs font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+        >
+          Salir{admin ? ` (${admin})` : ''}
+        </button>
+      </form>
+    </div>
+  </div>
+</header>
