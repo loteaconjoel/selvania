@@ -42,7 +42,7 @@ export const defaultContent: SiteContent = {
         style: 'lime',
       },
       {
-        label: '¡Quiero hablar con un asesor!',
+        label: 'Hablar con un asesor',
         message: 'Hola, quiero hablar con un asesor de Selvania Park.',
         style: 'outline',
       },
@@ -100,7 +100,7 @@ export const defaultContent: SiteContent = {
       source: { kind: 'file', src: '/video/selva.mp4' }, // PROVISIONAL
       poster: '/images/demo/selva-central.jpg',
       cta: {
-        label: '¡Quiero hablar con un asesor!',
+        label: 'Hablar con un asesor',
         message: 'Hola, vi el recorrido 3D de Selvania Park y quiero más información.',
         style: 'lime',
       },
@@ -158,7 +158,7 @@ export const defaultContent: SiteContent = {
         { src: '/images/demo/puente-perene.jpg', alt: 'Vías afirmadas', caption: 'Vías afirmadas' },
       ],
       cta: {
-        label: '¡Quiero hablar con un asesor!',
+        label: 'Hablar con un asesor',
         message: 'Hola, quiero saber más sobre los servicios básicos de Selvania Park.',
         style: 'outline',
       },
@@ -194,7 +194,7 @@ export const defaultContent: SiteContent = {
         },
       ],
       cta: {
-        label: '¡Quiero hablar con un asesor!',
+        label: 'Hablar con un asesor',
         message: 'Hola, quiero revisar la documentación de los lotes de Selvania Park.',
         style: 'gold',
       },

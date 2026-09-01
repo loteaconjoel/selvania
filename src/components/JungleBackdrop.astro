@@ -1,0 +1,58 @@
+---
+interface Props {
+  /** Cambia la colocación para que dos secciones seguidas no se vean iguales. */
+  variant?: number;
+}
+
+const { variant = 0 } = Astro.props;
+
+// Cada hoja se coloca con CSS, anclada a un borde. Se probó antes con un solo
+// SVG panorámico recortado con `slice`, pero en móvil solo queda visible su
+// franja central: las hojas de las esquinas desaparecían y la del medio caía
+// justo detrás del título. Anclando cada una a un borde, el resultado es el
+// mismo en cualquier proporción de pantalla.
+//
+// Van siempre a los lados, nunca en el centro, para no competir con el texto.
+const layouts = [
+  [
+    { pos: '-top-12 -left-14 w-44 sm:w-64', rotate: -20, opacity: 0.12 },
+    { pos: '-bottom-16 -right-12 w-52 sm:w-72', rotate: 160, opacity: 0.1 },
+  ],
+  [
+    { pos: '-top-14 -right-14 w-48 sm:w-68', rotate: 25, opacity: 0.12 },
+    { pos: '-bottom-14 -left-12 w-44 sm:w-64', rotate: -155, opacity: 0.1 },
+  ],
+  [
+    { pos: 'top-1/4 -left-20 w-40 sm:w-60', rotate: -6, opacity: 0.11 },
+    { pos: '-top-10 -right-16 w-44 sm:w-64', rotate: 145, opacity: 0.1 },
+  ],
+];
+
+const leaves = layouts[variant % layouts.length];
+---
+
+<div
+  class="pointer-events-none absolute inset-0 overflow-hidden text-sv-jungle-deep"
+  aria-hidden="true"
+>
+  {
+    leaves.map((leaf) => (
+      <svg
+        class:list={['absolute', leaf.pos]}
+        style={`transform: rotate(${leaf.rotate}deg); opacity: ${leaf.opacity}`}
+        viewBox="0 0 100 140"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        focusable="false"
+      >
+        {/* Contorno de la hoja, nervio central y nervaduras. */}
+        <path d="M50 4C22 34 12 84 50 136 88 84 78 34 50 4Z" />
+        <path d="M50 12V130" />
+        <path d="M50 40 26 29M50 40l24-11M50 68 21 57M50 68l29-11M50 96 27 89M50 96l23-7" />
+      </svg>
+    ))
+  }
+</div>

@@ -2,6 +2,7 @@
 import SectionHeader from '../SectionHeader.astro';
 import CtaButton from '../CtaButton.astro';
 import Icon from '../Icon.astro';
+import JungleBackdrop from '../JungleBackdrop.astro';
 import { surfaceOf } from '../../lib/surface';
 import type { TextBlock } from '../../data/types';
 
@@ -13,6 +14,7 @@ interface Props {
 
 const { block, number, alt } = Astro.props;
 const surface = surfaceOf(alt);
+const variant = block.id.charCodeAt(0) % 3;
 
 // Sobre el verde claro las tarjetas pasan a ser crema sólido: es el único tono
 // claro que se separa del fondo (3.07:1), y deja el texto oscuro a 16:1 dentro.
@@ -35,11 +37,12 @@ const card = {
 <section
   id={block.id}
   class:list={[
-    'px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
+    'relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
-  <div class="mx-auto max-w-6xl">
+  {alt && <JungleBackdrop variant={variant} />}
+  <div class="relative mx-auto max-w-6xl">
     <SectionHeader
       eyebrow={block.eyebrow}
       title={block.title}

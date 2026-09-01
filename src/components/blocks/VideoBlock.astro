@@ -2,6 +2,7 @@
 import SectionHeader from '../SectionHeader.astro';
 import CtaButton from '../CtaButton.astro';
 import VideoPlayer from '../VideoPlayer.astro';
+import JungleBackdrop from '../JungleBackdrop.astro';
 import { surfaceOf } from '../../lib/surface';
 import type { VideoBlock } from '../../data/types';
 
@@ -13,16 +14,18 @@ interface Props {
 
 const { block, number, alt } = Astro.props;
 const surface = surfaceOf(alt);
+const variant = block.id.charCodeAt(0) % 3;
 ---
 
 <section
   id={block.id}
   class:list={[
-    'px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
+    'relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
-  <div class="mx-auto max-w-6xl">
+  {alt && <JungleBackdrop variant={variant} />}
+  <div class="relative mx-auto max-w-6xl">
     <SectionHeader
       eyebrow={block.eyebrow}
       title={block.title}
