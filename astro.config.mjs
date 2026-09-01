@@ -20,6 +20,16 @@ export default defineConfig({
       ADMIN_USER: envField.string({ context: 'server', access: 'secret' }),
       ADMIN_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret' }),
       SESSION_SECRET: envField.string({ context: 'server', access: 'secret' }),
+
+      // Almacenamiento del contenido y las imágenes. Si faltan, el sitio
+      // funciona igual leyendo del archivo local: así se puede trabajar en
+      // local sin depender de Supabase.
+      SUPABASE_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      SUPABASE_SERVICE_ROLE_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
     },
   },
 

@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 # video de muestra: solo local, en produccion se usa un enlace
 public/video/
+
+# material de trabajo local: en produccion manda Supabase
+data/content.json
+public/uploads/

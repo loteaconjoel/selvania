@@ -1,13 +1,10 @@
 import type { APIRoute } from 'astro';
 import { randomBytes } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import {
-  UPLOADS_DIR,
-  UPLOADS_URL,
   canPersist,
   readContent,
   resetContent,
+  saveMedia,
   writeContent,
 } from '../../../lib/content-store';
 import * as f from '../../../lib/admin-forms';
@@ -98,37 +95,12 @@ function newBlock(type: f.BlockType): Block {
   }
 }
 
-const IMAGE_TYPES: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-  'image/avif': '.avif',
-  'image/gif': '.gif',
-};
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-
-/** Guarda una imagen subida y devuelve su ruta pública. */
-async function saveUpload(file: File): Promise<string> {
-  // El SVG queda fuera a propósito: puede llevar scripts dentro y se serviría
-  // desde el propio dominio.
-  const extension = IMAGE_TYPES[file.type];
-  if (!extension) throw new Error('formato');
-  if (file.size > MAX_UPLOAD_BYTES) throw new Error('tamano');
-
-  const name = `${f.slugify(file.name.replace(/\.[^.]+$/, '')) || 'imagen'}-${randomBytes(4).toString('hex')}${extension}`;
-
-  await mkdir(UPLOADS_DIR, { recursive: true });
-  await writeFile(join(UPLOADS_DIR, name), Buffer.from(await file.arrayBuffer()));
-
-  return `${UPLOADS_URL}/${name}`;
-}
-
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
   const action = f.text(form, 'accion');
   const to = f.text(form, 'volver', '/admin');
 
-  if (!canPersist) {
+  if (!canPersist()) {
     return back(to, '?e=sin-almacenamiento');
   }
 
@@ -141,7 +113,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'imagen') {
       const file = form.get('archivo');
       if (!(file instanceof File) || file.size === 0) return back(to, '?e=sin-archivo');
-      const url = await saveUpload(file);
+      const url = await saveMedia(file);
       return back(to, `?ok=imagen&url=${encodeURIComponent(url)}`);
     }
 

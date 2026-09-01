@@ -1,7 +1,8 @@
 ---
-import { canPersist } from '../../lib/content-store';
+import { storageMode } from '../../lib/content-store';
 
 const url = Astro.url;
+const mode = storageMode();
 
 const success: Record<string, string> = {
   guardado: 'Cambios guardados.',
@@ -21,7 +22,10 @@ const errors: Record<string, string> = {
   orden: 'La sección ya está en el extremo.',
   tipo: 'Tipo de sección desconocido.',
   accion: 'Acción desconocida.',
-  guardar: 'No se pudo guardar. Revisa los permisos del archivo data/content.json.',
+  guardar:
+    mode === 'supabase'
+      ? 'No se pudo guardar: Supabase no respondió. Revisa que las claves sigan siendo válidas y que el proyecto no esté pausado.'
+      : 'No se pudo guardar. Revisa los permisos del archivo data/content.json.',
 };
 
 const ok = success[url.searchParams.get('ok') ?? ''];
@@ -30,11 +34,21 @@ const uploaded = url.searchParams.get('url');
 ---
 
 {
-  !canPersist && (
+  mode === 'solo-lectura' && (
     <p class="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300 ring-1 ring-red-500/30">
-      <strong>El panel está en modo lectura.</strong> Este entorno tiene el disco en
-      solo lectura, así que nada de lo que guardes se conservará. Hace falta
-      conectar una base de datos antes de administrar desde aquí.
+      <strong>El panel está en modo lectura.</strong> Faltan las claves de Supabase
+      (<code>SUPABASE_URL</code> y <code>SUPABASE_SERVICE_ROLE_KEY</code>) en las
+      variables de entorno de Vercel, así que nada de lo que guardes se conservará.
+    </p>
+  )
+}
+
+{
+  mode === 'archivo' && (
+    <p class="rounded-xl bg-sv-gold/10 px-4 py-3 text-sm text-sv-gold ring-1 ring-sv-gold/30">
+      Guardando en el archivo local <code>data/content.json</code>, no en Supabase.
+      Es lo normal al trabajar en tu computadora; para que los cambios lleguen a la
+      web publicada hacen falta las claves de Supabase.
     </p>
   )
 }
