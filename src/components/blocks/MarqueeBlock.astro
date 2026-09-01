@@ -17,7 +17,7 @@ const copies = [0, 1];
 <div
   id={block.id}
   data-marquee
-  class="overflow-hidden border-y border-sv-lime/20 bg-sv-jungle py-4"
+  class="overflow-hidden border-y border-sv-jungle-deep/20 bg-sv-jungle py-4"
 >
   <div class="sv-marquee-track flex w-max">
     {
@@ -25,11 +25,11 @@ const copies = [0, 1];
         <ul class="flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
           {block.items.map((item) => (
             <li class="flex items-center gap-3 px-5">
-              <Icon name={item.icon} class="h-5 w-5 shrink-0 text-sv-lime" />
-              <span class="font-heading text-sm font-bold tracking-wider whitespace-nowrap text-sv-cream uppercase">
+              <Icon name={item.icon} class="h-5 w-5 shrink-0 text-sv-jungle-deep" />
+              <span class="font-heading text-sm font-bold tracking-wider whitespace-nowrap text-sv-jungle-deep uppercase">
                 {item.text}
               </span>
-              <span class="ml-5 h-1.5 w-1.5 rounded-full bg-sv-gold/70" aria-hidden="true" />
+              <span class="ml-5 h-1.5 w-1.5 rounded-full bg-sv-jungle-deep/50" aria-hidden="true" />
             </li>
           ))}
         </ul>

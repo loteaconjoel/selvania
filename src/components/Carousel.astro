@@ -1,12 +1,33 @@
 ---
 import type { Media } from '../data/types';
+import type { Surface } from '../lib/surface';
 
 interface Props {
   images: Media[];
   label: string;
+  surface?: Surface;
 }
 
-const { images, label } = Astro.props;
+const { images, label, surface = 'dark' } = Astro.props;
+
+const tone = {
+  dark: {
+    frame: 'ring-1 ring-sv-lime/25 shadow-2xl shadow-black/50',
+    caption: 'text-sv-cream/70',
+    control:
+      'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+    dotOn: 'bg-sv-lime',
+    dotOff: 'bg-sv-cream/30',
+  },
+  light: {
+    frame: 'ring-1 ring-sv-jungle-deep/25 shadow-2xl shadow-sv-jungle-deep/30',
+    caption: 'text-sv-jungle-deep',
+    control:
+      'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/35 hover:brightness-125',
+    dotOn: 'bg-sv-jungle-deep',
+    dotOff: 'bg-sv-jungle-deep/30',
+  },
+}[surface];
 ---
 
 <div
@@ -17,49 +38,60 @@ const { images, label } = Astro.props;
   aria-label={label}
 >
   <div class="overflow-hidden" data-embla-viewport>
-    <div class="-ml-3 flex touch-pan-y sm:-ml-4">
+    <div class="-ml-3 flex touch-pan-y sm:-ml-5">
       {
         images.map((img) => (
-          <figure class="min-w-0 shrink-0 grow-0 basis-[86%] pl-3 sm:basis-[58%] sm:pl-4 lg:basis-[42%]">
-            <div class="aspect-4/3 overflow-hidden rounded-2xl bg-sv-jungle ring-1 ring-sv-lime/20">
-              <img
-                src={img.src}
-                alt={img.alt}
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover"
-              />
+          <figure class="min-w-0 shrink-0 grow-0 basis-[86%] pl-3 sm:basis-[58%] sm:pl-5 lg:basis-[44%]">
+            {/* El escalado va en este envoltorio y no en el <figure>: si se
+                aplica al figure, su relleno se encoge con él y la foto vecina
+                se desplaza encima de la activa. */}
+            <div data-slide class="transition-[transform,filter] duration-500">
+              <div class:list={['aspect-4/3 overflow-hidden rounded-3xl bg-sv-jungle-deep', tone.frame]}>
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              {img.caption && (
+                <figcaption class:list={['mt-4 text-center text-sm font-medium', tone.caption]}>
+                  {img.caption}
+                </figcaption>
+              )}
             </div>
-            {img.caption && (
-              <figcaption class="mt-3 text-center text-sm text-sv-cream/70">
-                {img.caption}
-              </figcaption>
-            )}
           </figure>
         ))
       }
     </div>
   </div>
 
-  <div class="mt-6 flex items-center justify-center gap-4">
+  <div class="mt-7 flex items-center justify-center gap-4">
     <button
       type="button"
       data-embla-prev
       aria-label="Imagen anterior"
-      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-sv-lime/40 text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+      class:list={[
+        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
+        tone.control,
+      ]}
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
         <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
     </button>
 
-    <div class="flex items-center gap-2" data-embla-dots></div>
+    <div class="flex items-center gap-2" data-embla-dots data-dot-on={tone.dotOn} data-dot-off={tone.dotOff}></div>
 
     <button
       type="button"
       data-embla-next
       aria-label="Imagen siguiente"
-      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-sv-lime/40 text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+      class:list={[
+        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
+        tone.control,
+      ]}
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
         <path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -70,6 +102,14 @@ const { images, label } = Astro.props;
 
 <script>
   import EmblaCarousel from 'embla-carousel';
+
+  // Clases usadas al vuelo por el script. Se dejan escritas aquí para que el
+  // generador de CSS las encuentre al analizar el archivo.
+  const DOT_BASE = 'h-2.5 rounded-full transition-all duration-300';
+  // Se atenúa con brillo y escala, nunca con opacidad: sobre el fondo verde
+  // claro la opacidad mezcla la foto con el verde y parece un fallo de carga.
+  const SLIDE_ON = ['scale-100', 'brightness-100'];
+  const SLIDE_OFF = ['scale-95', 'brightness-[0.55]'];
 
   document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
     const viewport = root.querySelector<HTMLElement>('[data-embla-viewport]');
@@ -89,13 +129,15 @@ const { images, label } = Astro.props;
       ?.addEventListener('click', () => embla.scrollNext());
 
     const dotsNode = root.querySelector<HTMLElement>('[data-embla-dots]');
+    const onClass = dotsNode?.dataset.dotOn ?? 'bg-sv-lime';
+    const offClass = dotsNode?.dataset.dotOff ?? 'bg-sv-cream/30';
     const dots: HTMLButtonElement[] = [];
 
     if (dotsNode) {
       embla.scrollSnapList().forEach((_, i) => {
         const dot = document.createElement('button');
         dot.type = 'button';
-        dot.className = 'h-2 w-2 rounded-full transition-all duration-200';
+        dot.className = DOT_BASE;
         dot.setAttribute('aria-label', `Ir a la imagen ${i + 1}`);
         dot.addEventListener('click', () => embla.scrollTo(i));
         dotsNode.appendChild(dot);
@@ -103,17 +145,29 @@ const { images, label } = Astro.props;
       });
     }
 
-    const syncDots = () => {
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+
+    const sync = () => {
       const selected = embla.selectedScrollSnap();
+
       dots.forEach((dot, i) => {
         const active = i === selected;
-        dot.classList.toggle('bg-sv-lime', active);
-        dot.classList.toggle('w-6', active);
-        dot.classList.toggle('bg-sv-cream/30', !active);
+        dot.classList.toggle(onClass, active);
+        dot.classList.toggle(offClass, !active);
+        dot.classList.toggle('w-7', active);
+        dot.classList.toggle('w-2.5', !active);
+      });
+
+      // Las imágenes que no están centradas se atenúan: guía la mirada a la
+      // que toca y deja claro que hay más a los lados.
+      slides.forEach((slide, i) => {
+        const active = i === selected;
+        slide.classList.add(...(active ? SLIDE_ON : SLIDE_OFF));
+        slide.classList.remove(...(active ? SLIDE_OFF : SLIDE_ON));
       });
     };
 
-    embla.on('select', syncDots);
-    syncDots();
+    embla.on('select', sync);
+    sync();
   });
 </script>

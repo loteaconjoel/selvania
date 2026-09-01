@@ -2,6 +2,7 @@
 import SectionHeader from '../SectionHeader.astro';
 import CtaButton from '../CtaButton.astro';
 import Icon from '../Icon.astro';
+import { surfaceOf } from '../../lib/surface';
 import type { TextBlock } from '../../data/types';
 
 interface Props {
@@ -11,6 +12,24 @@ interface Props {
 }
 
 const { block, number, alt } = Astro.props;
+const surface = surfaceOf(alt);
+
+// Sobre el verde claro las tarjetas pasan a ser crema sólido: es el único tono
+// claro que se separa del fondo (3.07:1), y deja el texto oscuro a 16:1 dentro.
+const card = {
+  dark: {
+    box: 'bg-sv-cream/5 ring-1 ring-sv-lime/15',
+    iconBox: 'bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25',
+    title: 'text-sv-lime',
+    text: 'text-sv-cream/75',
+  },
+  light: {
+    box: 'bg-sv-cream ring-1 ring-sv-jungle-deep/10 shadow-lg shadow-sv-jungle-deep/20',
+    iconBox: 'bg-sv-jungle-deep text-sv-lime',
+    title: 'text-sv-jungle-deep',
+    text: 'text-sv-jungle-deep/85',
+  },
+}[surface];
 ---
 
 <section
@@ -25,17 +44,18 @@ const { block, number, alt } = Astro.props;
       eyebrow={block.eyebrow}
       title={block.title}
       description={block.description}
+      surface={surface}
     />
 
     <ul class="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
       {
         block.bullets.map((bullet) => (
-          <li class="rounded-2xl bg-sv-cream/5 p-6 ring-1 ring-sv-lime/15">
-            <span class="grid h-11 w-11 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
+          <li class:list={['rounded-2xl p-6', card.box]}>
+            <span class:list={['grid h-11 w-11 place-items-center rounded-xl', card.iconBox]}>
               <Icon name={bullet.icon} class="h-6 w-6" />
             </span>
-            <h3 class="mt-4 font-heading text-lg font-bold text-sv-lime">{bullet.title}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-sv-cream/75">{bullet.text}</p>
+            <h3 class:list={['mt-4 font-heading text-lg font-bold', card.title]}>{bullet.title}</h3>
+            <p class:list={['mt-2 text-sm leading-relaxed', card.text]}>{bullet.text}</p>
           </li>
         ))
       }
@@ -44,7 +64,13 @@ const { block, number, alt } = Astro.props;
     {
       block.cta && (
         <div class="mt-10 flex justify-center">
-          <CtaButton cta={block.cta} number={number} block={false} class="w-full sm:w-auto" />
+          <CtaButton
+            cta={block.cta}
+            number={number}
+            surface={surface}
+            block={false}
+            class="w-full sm:w-auto"
+          />
         </div>
       )
     }

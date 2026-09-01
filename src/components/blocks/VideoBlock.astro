@@ -2,6 +2,7 @@
 import SectionHeader from '../SectionHeader.astro';
 import CtaButton from '../CtaButton.astro';
 import VideoPlayer from '../VideoPlayer.astro';
+import { surfaceOf } from '../../lib/surface';
 import type { VideoBlock } from '../../data/types';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const { block, number, alt } = Astro.props;
+const surface = surfaceOf(alt);
 ---
 
 <section
@@ -25,16 +27,28 @@ const { block, number, alt } = Astro.props;
       eyebrow={block.eyebrow}
       title={block.title}
       description={block.description}
+      surface={surface}
     />
 
     <div class="mx-auto mt-10 max-w-3xl">
-      <VideoPlayer source={block.source} poster={block.poster} title={block.title} />
+      <VideoPlayer
+        source={block.source}
+        poster={block.poster}
+        title={block.title}
+        surface={surface}
+      />
     </div>
 
     {
       block.cta && (
         <div class="mt-10 flex justify-center">
-          <CtaButton cta={block.cta} number={number} block={false} class="w-full sm:w-auto" />
+          <CtaButton
+            cta={block.cta}
+            number={number}
+            surface={surface}
+            block={false}
+            class="w-full sm:w-auto"
+          />
         </div>
       )
     }

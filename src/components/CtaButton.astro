@@ -1,24 +1,46 @@
 ---
 import type { Cta } from '../data/types';
+import type { Surface } from '../lib/surface';
 import { waLink } from '../lib/whatsapp';
 
 interface Props {
   cta: Cta;
   number: string;
+  surface?: Surface;
   /** Ocupa todo el ancho disponible. En móvil conviene dejarlo en true. */
   block?: boolean;
   class?: string;
 }
 
-const { cta, number, block = true, class: extraClass = '' } = Astro.props;
+const { cta, number, surface = 'dark', block = true, class: extraClass = '' } = Astro.props;
 
-const styles: Record<Cta['style'], string> = {
-  whatsapp: 'bg-sv-whatsapp text-white hover:brightness-110',
-  lime: 'bg-sv-lime text-sv-jungle-deep hover:brightness-110',
-  gold: 'bg-sv-gold text-sv-jungle-deep hover:brightness-110',
-  outline:
-    'border-2 border-sv-lime text-sv-lime hover:bg-sv-lime hover:text-sv-jungle-deep',
+// Dos reglas guían estos colores:
+//   1. El texto contrasta al menos 4.5:1 con el relleno de su propio botón.
+//   2. El relleno contrasta al menos 3:1 con el fondo de la sección.
+// Sobre el verde claro solo cumplen la segunda el crema y el verde profundo,
+// así que ahí los botones se invierten en vez de repetir los de fondo oscuro.
+const styles: Record<Surface, Record<Cta['style'], string>> = {
+  dark: {
+    // Texto oscuro sobre el verde de WhatsApp: en blanco daría 1.98:1, ilegible.
+    whatsapp: 'bg-sv-whatsapp text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+    lime: 'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+    gold: 'bg-sv-gold text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+    outline:
+      'border-2 border-sv-lime text-sv-lime hover:bg-sv-lime hover:text-sv-jungle-deep',
+  },
+  light: {
+    whatsapp:
+      'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/35 hover:brightness-125',
+    lime: 'bg-sv-cream text-sv-jungle-deep ring-2 ring-sv-jungle-deep/20 shadow-lg shadow-sv-jungle-deep/25 hover:brightness-105',
+    gold: 'bg-sv-jungle-deep text-sv-gold shadow-lg shadow-sv-jungle-deep/35 hover:brightness-125',
+    outline:
+      'border-2 border-sv-jungle-deep text-sv-jungle-deep hover:bg-sv-jungle-deep hover:text-sv-cream',
+  },
 };
+
+// Sobre fondo claro el botón de WhatsApp pasa a ser oscuro y pierde la pista de
+// marca, así que el ícono conserva el verde original.
+const iconTint = surface === 'light' && cta.style === 'whatsapp' ? 'text-sv-whatsapp' : '';
 ---
 
 <a
@@ -32,7 +54,7 @@ const styles: Record<Cta['style'], string> = {
     // 56px de alto mínimo: objetivo táctil cómodo en móvil.
     'min-h-14 text-center transition duration-200 active:scale-[0.98]',
     block ? 'w-full' : 'w-auto',
-    styles[cta.style],
+    styles[surface][cta.style],
     extraClass,
   ]}
 >
@@ -40,7 +62,7 @@ const styles: Record<Cta['style'], string> = {
     viewBox="0 0 24 24"
     fill="currentColor"
     aria-hidden="true"
-    class="h-5 w-5 shrink-0"
+    class:list={['h-5 w-5 shrink-0', iconTint]}
   >
     <path
       d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.86 1.21 3.06c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35Z"

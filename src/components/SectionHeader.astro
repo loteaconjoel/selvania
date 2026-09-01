@@ -1,25 +1,52 @@
 ---
+import type { Surface } from '../lib/surface';
+
 interface Props {
   eyebrow?: string;
   title: string;
   description?: string;
+  surface?: Surface;
 }
 
-const { eyebrow, title, description } = Astro.props;
+const { eyebrow, title, description, surface = 'dark' } = Astro.props;
+
+// Sobre el verde claro, el antetítulo en verde menta daba 2.39:1 y el texto en
+// crema 3.07:1. En oscuro sube a 5.34:1 y el bloque entero se lee de un vistazo.
+const tone = {
+  dark: {
+    eyebrow: 'text-sv-gold',
+    title: 'text-sv-cream',
+    description: 'text-sv-cream/75',
+    rule: 'bg-sv-lime/50',
+  },
+  light: {
+    eyebrow: 'text-sv-jungle-deep',
+    title: 'text-sv-jungle-deep',
+    description: 'text-sv-jungle-deep/90',
+    rule: 'bg-sv-jungle-deep/30',
+  },
+}[surface];
 ---
 
 <header class="mx-auto max-w-3xl text-center">
   {
     eyebrow && (
-      <p class="font-heading text-sm font-bold tracking-[0.2em] text-sv-gold uppercase">
+      <p
+        class:list={[
+          'flex items-center justify-center gap-3 font-heading text-sm font-bold tracking-[0.2em] uppercase',
+          tone.eyebrow,
+        ]}
+      >
+        <span class:list={['h-px w-6 sm:w-10', tone.rule]} aria-hidden="true" />
         {eyebrow}
+        <span class:list={['h-px w-6 sm:w-10', tone.rule]} aria-hidden="true" />
       </p>
     )
   }
-  <h2 class="mt-3 text-3xl text-sv-cream sm:text-4xl lg:text-5xl">{title}</h2>
+  <h2 class:list={['mt-3 text-3xl sm:text-4xl lg:text-5xl', tone.title]}>{title}</h2>
   {
     description && (
-      <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-sv-cream/75 sm:text-lg">
+      <p class:list={['mx-auto mt-5 max-w-2xl text-base leading-relaxed sm:text-lg', tone.description]}>
         {description}
       </p>
     )

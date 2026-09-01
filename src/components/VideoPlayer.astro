@@ -1,10 +1,12 @@
 ---
 import type { VideoSource } from '../data/types';
+import type { Surface } from '../lib/surface';
 
 interface Props {
   source: VideoSource;
   poster?: string;
   title: string;
+  surface?: Surface;
   /**
    * Para el video de la cabecera. Su portada es lo primero que se ve, así que
    * se pide de inmediato en vez de diferirla: diferir la imagen principal es
@@ -13,7 +15,7 @@ interface Props {
   priority?: boolean;
 }
 
-const { source, poster, title, priority = false } = Astro.props;
+const { source, poster, title, surface = 'dark', priority = false } = Astro.props;
 
 // En YouTube, si no hay portada propia se usa la miniatura del propio video.
 const cover =
@@ -21,6 +23,11 @@ const cover =
   (source.kind === 'youtube'
     ? `https://i.ytimg.com/vi/${source.youtubeId}/hqdefault.jpg`
     : undefined);
+
+const frame = {
+  dark: 'ring-1 ring-sv-lime/25 shadow-2xl shadow-black/60',
+  light: 'ring-1 ring-sv-jungle-deep/30 shadow-2xl shadow-sv-jungle-deep/40',
+}[surface];
 ---
 
 {/* Fachada: hasta que no se toca play no se descarga ni el reproductor de
@@ -30,7 +37,10 @@ const cover =
   data-video
   data-kind={source.kind}
   data-src={source.kind === 'youtube' ? source.youtubeId : source.src}
-  class="group relative aspect-video w-full cursor-pointer overflow-hidden rounded-2xl bg-sv-jungle ring-1 ring-sv-lime/20"
+  class:list={[
+    'group relative aspect-video w-full cursor-pointer overflow-hidden rounded-3xl bg-sv-jungle-deep',
+    frame,
+  ]}
 >
   {
     cover ? (
@@ -40,20 +50,47 @@ const cover =
         loading={priority ? 'eager' : 'lazy'}
         fetchpriority={priority ? 'high' : undefined}
         decoding="async"
-        class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+        class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
       />
     ) : null
   }
-  <div class="absolute inset-0 bg-sv-jungle-deep/30"></div>
-  <button type="button" aria-label={`Reproducir: ${title}`} class="absolute inset-0 grid place-items-center">
-    <span
-      class="grid h-18 w-18 place-items-center rounded-full bg-sv-lime text-sv-jungle-deep shadow-xl transition duration-200 group-hover:scale-110"
-    >
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ml-1 h-8 w-8">
-        <path d="M8 5.14v13.72L19 12 8 5.14Z"></path>
-      </svg>
+
+  {/* Velo oscuro: la portada puede ser un cielo claro, y sin esto el botón de
+      play se perdería encima. Con él, el contraste está garantizado sea cual
+      sea la foto que suba el cliente. */}
+  <div
+    class="absolute inset-0 bg-gradient-to-t from-sv-jungle-deep/80 via-sv-jungle-deep/25 to-sv-jungle-deep/40"
+    aria-hidden="true"
+  >
+  </div>
+
+  <button
+    type="button"
+    aria-label={`Reproducir: ${title}`}
+    class="absolute inset-0 grid place-items-center"
+  >
+    <span class="relative grid place-items-center">
+      {/* Halo que late para atraer el toque. Se detiene si el sistema pide
+          reducir el movimiento. */}
+      <span
+        class="absolute h-20 w-20 animate-ping rounded-full bg-sv-lime/25 motion-reduce:hidden"
+        aria-hidden="true"
+      ></span>
+      <span
+        class="relative grid h-20 w-20 place-items-center rounded-full bg-sv-lime text-sv-jungle-deep shadow-2xl shadow-black/50 ring-4 ring-sv-cream/15 transition duration-300 group-hover:scale-110"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ml-1 h-9 w-9">
+          <path d="M8 5.14v13.72L19 12 8 5.14Z"></path>
+        </svg>
+      </span>
     </span>
   </button>
+
+  <span
+    class="pointer-events-none absolute bottom-4 left-4 rounded-full bg-sv-jungle-deep/75 px-3.5 py-1.5 font-heading text-xs font-bold tracking-wider text-sv-cream uppercase backdrop-blur-sm"
+  >
+    Ver video
+  </span>
 </div>
 
 <script>
