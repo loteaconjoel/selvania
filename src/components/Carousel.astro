@@ -12,18 +12,20 @@ const { images, label, surface = 'dark' } = Astro.props;
 
 const tone = {
   dark: {
-    frame: 'ring-1 ring-sv-lime/25 shadow-2xl shadow-black/50',
+    // Sombra corta y muy difuminada hacia abajo. La anterior era `shadow-2xl`
+    // teñido, que sobre un fondo plano deja un manchón oscuro alrededor de la
+    // foto en vez de leerse como profundidad.
+    frame: 'ring-1 ring-sv-lime/25 shadow-lg shadow-black/40',
     caption: 'text-sv-cream/70',
-    control:
-      'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+    control: 'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
     dotOn: 'bg-sv-lime',
     dotOff: 'bg-sv-cream/30',
   },
   light: {
-    frame: 'ring-1 ring-sv-jungle-deep/25 shadow-2xl shadow-sv-jungle-deep/30',
+    frame: 'ring-1 ring-sv-jungle-deep/20 shadow-lg shadow-sv-jungle-deep/20',
     caption: 'text-sv-jungle-deep',
     control:
-      'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/35 hover:brightness-125',
+      'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/30 hover:brightness-125',
     dotOn: 'bg-sv-jungle-deep',
     dotOff: 'bg-sv-jungle-deep/30',
   },
@@ -41,12 +43,17 @@ const tone = {
     <div class="-ml-3 flex touch-pan-y sm:-ml-5">
       {
         images.map((img) => (
-          <figure class="min-w-0 shrink-0 grow-0 basis-[86%] pl-3 sm:basis-[58%] sm:pl-5 lg:basis-[44%]">
+          <figure class="min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-[56%] sm:pl-5 lg:basis-[42%]">
             {/* El escalado va en este envoltorio y no en el <figure>: si se
                 aplica al figure, su relleno se encoge con él y la foto vecina
                 se desplaza encima de la activa. */}
             <div data-slide class="transition-[transform,filter] duration-500">
-              <div class:list={['aspect-4/3 overflow-hidden rounded-3xl bg-sv-jungle-deep', tone.frame]}>
+              <div
+                class:list={[
+                  'relative aspect-4/3 overflow-hidden rounded-3xl bg-sv-jungle-deep',
+                  tone.frame,
+                ]}
+              >
                 <img
                   src={img.src}
                   alt={img.alt}
@@ -54,7 +61,33 @@ const tone = {
                   decoding="async"
                   class="h-full w-full object-cover"
                 />
+
+                <button
+                  type="button"
+                  data-zoom
+                  data-src={img.src}
+                  data-alt={img.alt}
+                  data-caption={img.caption ?? ''}
+                  aria-label={`Ampliar imagen: ${img.alt}`}
+                  class="absolute top-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-sv-jungle-deep/70 text-sv-cream ring-1 ring-sv-cream/20 backdrop-blur-sm transition duration-200 hover:bg-sv-jungle-deep hover:scale-105 active:scale-95"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-5 w-5"
+                  >
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                    <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+                    <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+                    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+                  </svg>
+                </button>
               </div>
+
               {img.caption && (
                 <figcaption class:list={['mt-4 text-center text-sm font-medium', tone.caption]}>
                   {img.caption}
@@ -82,7 +115,13 @@ const tone = {
       </svg>
     </button>
 
-    <div class="flex items-center gap-2" data-embla-dots data-dot-on={tone.dotOn} data-dot-off={tone.dotOff}></div>
+    <div
+      class="flex items-center gap-2"
+      data-embla-dots
+      data-dot-on={tone.dotOn}
+      data-dot-off={tone.dotOff}
+    >
+    </div>
 
     <button
       type="button"
@@ -98,6 +137,39 @@ const tone = {
       </svg>
     </button>
   </div>
+
+  {/* Se usa <dialog> nativo: trae gratis el cierre con Escape, el foco atrapado
+      dentro y el fondo oscurecido, sin librerías. */}
+  <dialog
+    data-lightbox
+    class="m-auto max-h-[92dvh] max-w-[95vw] rounded-3xl bg-transparent p-0 backdrop:bg-black/85"
+  >
+    {/* Columna con separación explícita: el pie va en su propia píldora para
+        que nunca se confunda con la parte baja de la foto. */}
+    <figure class="relative m-0 flex flex-col items-center gap-4">
+      <img
+        data-lightbox-img
+        src=""
+        alt=""
+        class="max-h-[76dvh] max-w-[95vw] rounded-3xl object-contain"
+      />
+      <figcaption
+        data-lightbox-caption
+        class="rounded-full bg-sv-jungle-deep/90 px-5 py-2 text-center text-sm font-medium text-sv-cream ring-1 ring-sv-cream/15"
+      >
+      </figcaption>
+      <button
+        type="button"
+        data-lightbox-close
+        aria-label="Cerrar"
+        class="absolute top-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-sv-jungle-deep/80 text-sv-cream ring-1 ring-sv-cream/25 backdrop-blur-sm transition hover:bg-sv-jungle-deep"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+          <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </figure>
+  </dialog>
 </div>
 
 <script>
@@ -117,7 +189,9 @@ const tone = {
 
     const embla = EmblaCarousel(viewport, {
       loop: true,
-      align: 'center',
+      // Alineado al inicio para que la primera foto arranque justo en el mismo
+      // margen que el título y el texto de la sección.
+      align: 'start',
       skipSnaps: false,
     });
 
@@ -169,5 +243,39 @@ const tone = {
 
     embla.on('select', sync);
     sync();
+
+    // --- Ampliar imagen ---
+    const dialog = root.querySelector<HTMLDialogElement>('[data-lightbox]');
+    const big = dialog?.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const bigCaption = dialog?.querySelector<HTMLElement>('[data-lightbox-caption]');
+
+    if (dialog && big) {
+      root.querySelectorAll<HTMLButtonElement>('[data-zoom]').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          // Sin esto, el clic llega también al carrusel y cambia de foto.
+          event.stopPropagation();
+          big.src = btn.dataset.src ?? '';
+          big.alt = btn.dataset.alt ?? '';
+
+          const caption = btn.dataset.caption ?? '';
+          if (bigCaption) {
+            bigCaption.textContent = caption;
+            // Sin pie no se deja la píldora vacía flotando bajo la foto.
+            bigCaption.hidden = caption === '';
+          }
+
+          dialog.showModal();
+        });
+      });
+
+      dialog
+        .querySelector<HTMLButtonElement>('[data-lightbox-close]')
+        ?.addEventListener('click', () => dialog.close());
+
+      // Un clic fuera de la imagen tiene como destino el propio <dialog>.
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+    }
   });
 </script>

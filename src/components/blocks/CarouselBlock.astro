@@ -36,10 +36,15 @@ const variant = block.id.charCodeAt(0) % 3;
     </div>
   </div>
 
-  {/* El carrusel se sale del contenedor a propósito: en móvil se ve el borde
-      de la siguiente foto, que es lo que invita a deslizar. */}
-  <div class="relative mt-10 pl-4 sm:mx-auto sm:max-w-6xl sm:px-6 sm:pl-6">
-    <Carousel images={block.images} label={block.title} surface={surface} />
+  {/* El carrusel comparte márgenes con el título y el texto: antes se salía por
+      la izquierda y la foto anterior quedaba cortada a media altura contra el
+      borde de la pantalla. Ahora la foto activa arranca en el mismo contorno y
+      lo que asoma es la siguiente, por la derecha, que es lo que invita a
+      deslizar. */}
+  <div class="relative mt-10 px-4 sm:px-6">
+    <div class="mx-auto max-w-6xl">
+      <Carousel images={block.images} label={block.title} surface={surface} />
+    </div>
   </div>
 
   {
