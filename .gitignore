@@ -33,3 +33,7 @@ public/video/
 # material de trabajo local: en produccion manda Supabase
 data/content.json
 public/uploads/
+
+# fotos originales de entrada: se procesan y suben a Supabase, no al repo
+fotos-nuevas/*
+!fotos-nuevas/LEEME.md
