@@ -6,23 +6,26 @@ Supabase y las coloco en la sección que toca con su texto alternativo y su pie.
 Esta carpeta es solo de paso: no se sube al repositorio ni se publica. Las fotos
 acaban en el almacenamiento de Supabase, que es de donde las sirve la web.
 
-## Las cuatro de ahora
+## Ya incorporadas
 
-Guárdalas con estos nombres para que las reconozca sin preguntarte cuál es cuál:
+Estas cuatro ya están optimizadas, subidas a Supabase y repartidas por secciones:
 
-| Nombre del archivo | Qué se ve | Sección a la que va |
+| Archivo | Qué se ve | Dónde aparece |
 |---|---|---|
-| `piscina.jpg` | Piscina con palmeras, toboganes y sombrillas | Servicios básicos |
-| `naranjos.jpg` | Cítricos en primer plano sobre terreno despejado | El proyecto |
-| `huerto.jpg` | Huerto de naranjos con el cerro al fondo | El proyecto |
-| `movimiento-tierras.jpg` | Retroexcavadora trabajando junto al montón de piedras | El puente / accesos |
+| `piscina` | Piscina con palmeras y toboganes | Servicios, El proyecto, Por qué |
+| `naranjos` | Cítricos sobre terreno despejado | El proyecto, Por qué. También es la imagen al compartir el enlace |
+| `huerto` | Huerto con el cerro al fondo | El proyecto, Servicios, Por qué |
+| `movimiento-tierras` | Retroexcavadora junto al montón de piedras | El puente, Servicios |
 
-Si prefieres otros nombres no pasa nada: guárdalas como sea y dime cuál es cuál.
+Con solo cuatro fotos se repiten entre secciones. En cuanto lleguen más, se
+reparten mejor.
 
 ## Lo que falta
 
-**Una foto del puente.** Es la sección con el argumento de venta más fuerte de
-la landing y ahora mismo no hay ninguna imagen real que la respalde.
+**Una foto del puente.** Es la seccion con el argumento de venta mas fuerte de
+la landing y ahora mismo solo se muestra el movimiento de tierras del acceso:
+una sola imagen, porque es lo unico real que hay. No se rellena con fotos que
+no ensenan lo que el texto promete.
 
 ## La otra vía
 

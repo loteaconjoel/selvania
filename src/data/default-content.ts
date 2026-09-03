@@ -5,15 +5,19 @@ import type { SiteContent } from './types';
 // data/content.json y este queda solo como valor de fábrica al que se puede
 // volver desde el panel.
 //
-// Los textos, las fotos y el video son de muestra: hay que reemplazarlos por los
-// del proyecto. Ver public/images/demo/CREDITOS.md sobre las licencias.
+// Las fotos y el video ya son del proyecto. Los textos siguen siendo de
+// muestra en las cifras concretas: revisarlos antes de publicar.
+
+// Las fotos viven en el almacenamiento de Supabase, no en el repositorio: es de
+// donde las sirve la web y de donde las reemplaza el cliente desde el panel.
+const FOTO = 'https://hzqfgzkdlcnnzcozlwll.supabase.co/storage/v1/object/public/media';
 
 export const defaultContent: SiteContent = {
   seo: {
     title: 'Selvania Park | Lotes en la selva central, a 15 min de Pichanaki',
     description:
       'El lugar de tu nuevo comienzo en el corazón de la selva central, a 15 minutos del parque de Pichanaki. Lotes con documentación en regla y servicios básicos.',
-    ogImage: '/images/og.svg',
+    ogImage: `${FOTO}/og-selvania.jpg`,
   },
 
   announcement: {
@@ -110,10 +114,21 @@ export const defaultContent: SiteContent = {
       description:
         'Lotes amplios rodeados de naturaleza viva, a pocos minutos del centro de Pichanaki.',
       images: [
-        { src: '/images/demo/valle-pichanaki.jpg', alt: 'Vista aérea del proyecto', caption: 'Vista aérea del terreno' },
-        { src: '/images/demo/selva-central.jpg', alt: 'Lotes demarcados', caption: 'Lotes ya demarcados' },
-        { src: '/images/demo/puente-perene.jpg', alt: 'Vías internas', caption: 'Vías internas afirmadas' },
-        { src: '/images/demo/valle-pichanaki.jpg', alt: 'Áreas verdes', caption: 'Áreas verdes comunes' },
+        {
+          src: `${FOTO}/naranjos.jpg`,
+          alt: 'Árboles de cítricos cargados de fruta sobre terreno despejado',
+          caption: 'Cítricos en el terreno',
+        },
+        {
+          src: `${FOTO}/huerto.jpg`,
+          alt: 'Huerto de naranjos con cerros y palmeras al fondo',
+          caption: 'El huerto, con el cerro al fondo',
+        },
+        {
+          src: `${FOTO}/piscina.jpg`,
+          alt: 'Piscina con toboganes, palmeras y sombrillas',
+          caption: 'Zona recreativa',
+        },
       ],
       cta: {
         label: '¡Agenda tu visita!',
@@ -129,10 +144,15 @@ export const defaultContent: SiteContent = {
       title: '¿Por qué un puente propio cambia todo?',
       description:
         'Un acceso directo y transitable todo el año es lo que separa un terreno al que se llega, de uno al que solo se intenta llegar. El puente garantiza entrada en cualquier temporada, revaloriza cada lote y permite el ingreso de maquinaria y materiales para construir.',
+      // Todavía no hay foto del puente. Se muestra el trabajo de acceso, que es
+      // lo único real que tenemos de esta sección, en vez de rellenar con fotos
+      // que no enseñan lo que el texto promete.
       images: [
-        { src: '/images/demo/puente-perene.jpg', alt: 'Puente de acceso', caption: 'Puente de acceso al proyecto' },
-        { src: '/images/demo/valle-pichanaki.jpg', alt: 'Estructura del puente', caption: 'Estructura reforzada' },
-        { src: '/images/demo/selva-central.jpg', alt: 'Vía de ingreso', caption: 'Vía de ingreso directa' },
+        {
+          src: `${FOTO}/movimiento-tierras.jpg`,
+          alt: 'Retroexcavadora trabajando junto a un montón de piedras de río',
+          caption: 'Movimiento de tierras para el acceso',
+        },
       ],
       cta: {
         label: '¡Separa tu lote!',
@@ -149,9 +169,21 @@ export const defaultContent: SiteContent = {
       description:
         'El proyecto cuenta con los servicios básicos habilitados para que puedas empezar a construir desde el primer día.',
       images: [
-        { src: '/images/demo/selva-central.jpg', alt: 'Red de agua', caption: 'Agua' },
-        { src: '/images/demo/valle-pichanaki.jpg', alt: 'Red eléctrica', caption: 'Luz' },
-        { src: '/images/demo/puente-perene.jpg', alt: 'Vías afirmadas', caption: 'Vías afirmadas' },
+        {
+          src: `${FOTO}/piscina.jpg`,
+          alt: 'Piscina con toboganes, palmeras y sombrillas',
+          caption: 'Piscina y zona de recreo',
+        },
+        {
+          src: `${FOTO}/movimiento-tierras.jpg`,
+          alt: 'Retroexcavadora trabajando junto a un montón de piedras de río',
+          caption: 'Trabajos de habilitación en marcha',
+        },
+        {
+          src: `${FOTO}/huerto.jpg`,
+          alt: 'Huerto de naranjos con cerros y palmeras al fondo',
+          caption: 'Áreas verdes del proyecto',
+        },
       ],
       cta: {
         label: 'Hablar con un asesor',
@@ -204,9 +236,21 @@ export const defaultContent: SiteContent = {
       description:
         'Porque la selva central se está valorizando cada año, y los lotes con acceso, servicios y papeles en regla son cada vez menos.',
       images: [
-        { src: '/images/demo/valle-pichanaki.jpg', alt: 'Familia en el proyecto', caption: 'Un lugar para tu familia' },
-        { src: '/images/demo/selva-central.jpg', alt: 'Naturaleza', caption: 'Naturaleza a tu puerta' },
-        { src: '/images/demo/puente-perene.jpg', alt: 'Inversión', caption: 'Una inversión que crece' },
+        {
+          src: `${FOTO}/piscina.jpg`,
+          alt: 'Piscina con toboganes, palmeras y sombrillas',
+          caption: 'Un lugar para tu familia',
+        },
+        {
+          src: `${FOTO}/naranjos.jpg`,
+          alt: 'Árboles de cítricos cargados de fruta sobre terreno despejado',
+          caption: 'Cítricos en producción',
+        },
+        {
+          src: `${FOTO}/huerto.jpg`,
+          alt: 'Huerto de naranjos con cerros y palmeras al fondo',
+          caption: 'Naturaleza a tu puerta',
+        },
       ],
       cta: {
         label: '¡Únete a Selvania Park!',
