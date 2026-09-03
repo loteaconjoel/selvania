@@ -32,6 +32,11 @@ export const defaultContent: SiteContent = {
     tagline:
       'El lugar de tu nuevo comienzo en el corazón de la selva central, a 15 min del parque de Pichanaki',
     video: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
+    // Uno principal y uno secundario. Cuatro botones al mismo número no daban
+    // cuatro opciones: repartían la atención entre lo mismo. Quien ya decidió
+    // agenda la visita; quien todavía no, pregunta. Las otras intenciones
+    // siguen existiendo más abajo, cada una en la sección donde encaja:
+    // «¡Separa tu lote!» en el puente y «¡Únete a Selvania Park!» en el cierre.
     ctas: [
       {
         label: '¡Agenda tu visita!',
@@ -40,19 +45,9 @@ export const defaultContent: SiteContent = {
         style: 'whatsapp',
       },
       {
-        label: '¡Separa tu lote!',
-        message: 'Hola, quiero información para separar un lote en Selvania Park.',
-        style: 'lime',
-      },
-      {
         label: 'Hablar con un asesor',
-        message: 'Hola, quiero hablar con un asesor de Selvania Park.',
+        message: 'Hola, vi la página de Selvania Park y quiero hablar con un asesor.',
         style: 'outline',
-      },
-      {
-        label: '¡Únete a Selvania Park!',
-        message: 'Hola, quiero ser parte de Selvania Park. ¿Me dan más información?',
-        style: 'gold',
       },
     ],
   },
