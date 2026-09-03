@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemeStyle from '../components/ThemeStyle.astro';
-import { googleFontsUrl } from '../lib/whatsapp';
+import { googleFontsUrls } from '../lib/whatsapp';
 import type { SiteContent } from '../data/types';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { site } = Astro.props;
-const fontsHref = googleFontsUrl(site.theme.fonts.heading, site.theme.fonts.body);
+const fontsHrefs = googleFontsUrls(site.theme.fonts.heading, site.theme.fonts.body);
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 const ogImage = new URL(site.seo.ogImage, canonical);
 ---
@@ -35,7 +35,7 @@ const ogImage = new URL(site.seo.ogImage, canonical);
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={fontsHref} />
+    {fontsHrefs.map((href) => <link rel="stylesheet" href={href} />)}
     <!-- La miniatura del video se pide apenas carga la página. -->
     <link rel="preconnect" href="https://i.ytimg.com" />
 

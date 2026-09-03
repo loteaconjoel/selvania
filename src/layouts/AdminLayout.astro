@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemeStyle from '../components/ThemeStyle.astro';
-import { googleFontsUrl } from '../lib/whatsapp';
+import { googleFontsUrls } from '../lib/whatsapp';
 import { readContent } from '../lib/content-store';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 
 const { title } = Astro.props;
 const site = await readContent();
-const fontsHref = googleFontsUrl(site.theme.fonts.heading, site.theme.fonts.body);
+const fontsHrefs = googleFontsUrls(site.theme.fonts.heading, site.theme.fonts.body);
 ---
 
 <!doctype html>
@@ -25,7 +25,7 @@ const fontsHref = googleFontsUrl(site.theme.fonts.heading, site.theme.fonts.body
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={fontsHref} />
+    {fontsHrefs.map((href) => <link rel="stylesheet" href={href} />)}
 
     <ThemeStyle theme={site.theme} />
   </head>

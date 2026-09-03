@@ -25,10 +25,7 @@ export const defaultContent: SiteContent = {
     brand: 'Selvania Park',
     tagline:
       'El lugar de tu nuevo comienzo en el corazón de la selva central, a 15 min del parque de Pichanaki',
-    // PROVISIONAL: video de muestra. Al publicar conviene moverlo a YouTube
-    // (kind: 'youtube') para no gastar el ancho de banda del hosting.
-    video: { kind: 'file', src: '/video/selva.mp4' },
-    poster: '/images/demo/valle-pichanaki.jpg',
+    video: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
     ctas: [
       {
         label: '¡Agenda tu visita!',
@@ -67,7 +64,7 @@ export const defaultContent: SiteContent = {
       cream: '#FAFAFA',
     },
     fonts: {
-      heading: 'Outfit',
+      heading: 'Space Grotesk',
       body: 'Inter',
     },
   },
@@ -97,8 +94,7 @@ export const defaultContent: SiteContent = {
       title: 'Conoce Selvania Park en 3D',
       description:
         'Recorre el proyecto completo antes de venir: la distribución de los lotes, las vías internas y las áreas comunes, tal como quedarán.',
-      source: { kind: 'file', src: '/video/selva.mp4' }, // PROVISIONAL
-      poster: '/images/demo/selva-central.jpg',
+      source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
       cta: {
         label: 'Hablar con un asesor',
         message: 'Hola, vi el recorrido 3D de Selvania Park y quiero más información.',
