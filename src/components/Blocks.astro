@@ -1,6 +1,7 @@
 ---
 import VideoBlock from './blocks/VideoBlock.astro';
 import CarouselBlock from './blocks/CarouselBlock.astro';
+import ShowcaseBlock from './blocks/ShowcaseBlock.astro';
 import TextBlock from './blocks/TextBlock.astro';
 import MarqueeBlock from './blocks/MarqueeBlock.astro';
 import type { Block } from '../data/types';
@@ -37,6 +38,8 @@ const prepared = visible.map((block) => {
         return <VideoBlock block={block} number={number} alt={alt} />;
       case 'carousel':
         return <CarouselBlock block={block} number={number} alt={alt} />;
+      case 'showcase':
+        return <ShowcaseBlock block={block} number={number} alt={alt} />;
       case 'text':
         return <TextBlock block={block} number={number} alt={alt} />;
     }

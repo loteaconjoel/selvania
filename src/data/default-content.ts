@@ -22,7 +22,9 @@ export const defaultContent: SiteContent = {
 
   announcement: {
     enabled: true,
-    html: 'MÁS DEL <strong>85% DE LOS LOTES</strong> DE LA PRIMERA ETAPA YA ESTÁN <strong>RESERVADOS</strong>',
+    // Informativa, no de urgencia: cualquier porcentaje de vendidos sería un
+    // dato inventado.
+    html: 'LOTES EN <strong>SELVANIA PARK</strong> · A 15 MIN DEL PARQUE DE PICHANAKI',
   },
 
   hero: {
@@ -79,40 +81,31 @@ export const defaultContent: SiteContent = {
       type: 'marquee',
       enabled: true,
       label: 'Franja de argumentos de venta',
+      // Sin cifras: no se publican medidas, precios ni cantidades. Cada frase
+      // dice algo que el proyecto ofrece y que se puede sostener.
       items: [
-        { icon: 'escudo', text: 'Documentación 100% en regla' },
-        { icon: 'ubicacion', text: 'A 15 min de Pichanaki' },
-        { icon: 'plusvalia', text: 'Plusvalía que crece cada año' },
-        { icon: 'llave', text: 'Financiamiento directo, sin bancos' },
-        { icon: 'plano', text: 'Lotes desde 300 m²' },
-        { icon: 'reloj', text: 'Visitas guiadas todos los días' },
-        { icon: 'familias', text: 'Más de 100 familias ya son parte' },
-        { icon: 'casa', text: 'Listo para construir desde el día uno' },
+        { icon: 'escudo', text: 'Documentación en regla ante notaría' },
+        { icon: 'ubicacion', text: 'A 15 min del parque de Pichanaki' },
+        { icon: 'plano', text: 'Lotes de distintas medidas' },
+        { icon: 'ruta', text: 'Acceso por puente propio' },
+        { icon: 'rayo', text: 'Servicios básicos habilitados' },
+        { icon: 'hoja', text: 'En el corazón de la selva central' },
+        { icon: 'reloj', text: 'Visitas guiadas al proyecto' },
       ],
     },
-    {
-      id: 'proyecto-3d',
-      type: 'video',
-      enabled: true,
-      eyebrow: 'Recorrido virtual',
-      title: 'Conoce Selvania Park en 3D',
-      description:
-        'Recorre el proyecto completo antes de venir: la distribución de los lotes, las vías internas y las áreas comunes, tal como quedarán.',
-      source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
-      cta: {
-        label: 'Hablar con un asesor',
-        message: 'Hola, vi el recorrido 3D de Selvania Park y quiero más información.',
-        style: 'lime',
-      },
-    },
+    // S2 y S3 de la maqueta van en un solo bloque, con los seis componentes que
+    // pide en ese orden: título, descripción, video, encabezado, carrusel y
+    // botón. El título es el de S2 y el encabezado intermedio es el de S3.
     {
       id: 'el-proyecto',
-      type: 'carousel',
+      type: 'showcase',
       enabled: true,
       eyebrow: 'El proyecto',
-      title: 'Así es Selvania Park',
+      title: 'Conoce Selvania Park',
       description:
-        'Lotes amplios rodeados de naturaleza viva, a pocos minutos del centro de Pichanaki.',
+        'Un terreno amplio dividido en lotes, en el corazón de la selva central. Míralo primero en video y después en fotos del lugar.',
+      source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
+      heading: 'Así se ve hoy el proyecto',
       images: [
         {
           src: `${FOTO}/naranjos.jpg`,

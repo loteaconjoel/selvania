@@ -88,6 +88,15 @@ function newBlock(type: f.BlockType): Block {
       };
     case 'carousel':
       return { ...common, type: 'carousel', title: 'Nuevo carrusel', images: [] };
+    case 'showcase':
+      return {
+        ...common,
+        type: 'showcase',
+        title: 'Nueva sección con video y carrusel',
+        source: { kind: 'youtube', youtubeId: '' },
+        heading: '',
+        images: [],
+      };
     case 'text':
       return { ...common, type: 'text', title: 'Nueva sección de texto', bullets: [] };
     case 'marquee':
@@ -182,6 +191,11 @@ export const POST: APIRoute = async ({ request }) => {
           block.source = f.videoSource(form, 'video', block.source);
           block.poster = f.mediaUrl(f.text(form, 'poster')) || undefined;
         } else if (block.type === 'carousel') {
+          block.images = readImages(form);
+        } else if (block.type === 'showcase') {
+          block.source = f.videoSource(form, 'video', block.source);
+          block.poster = f.mediaUrl(f.text(form, 'poster')) || undefined;
+          block.heading = f.text(form, 'heading') || undefined;
           block.images = readImages(form);
         } else {
           block.bullets = readBullets(form);

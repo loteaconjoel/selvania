@@ -34,6 +34,7 @@ const ctaStyles = [
 const typeLabels = {
   video: 'Video',
   carousel: 'Carrusel de imágenes',
+  showcase: 'Video + carrusel',
   text: 'Texto con puntos',
   marquee: 'Franja en movimiento',
 } as const;
@@ -147,13 +148,22 @@ const orderInput =
               </div>
             </Card>
 
-            {block.type === 'video' && (
+            {(block.type === 'video' || block.type === 'showcase') && (
               <Card title="Video">
                 <VideoFields prefix="video" source={block.source} poster={block.poster} posterName="poster" />
               </Card>
             )}
 
-            {block.type === 'carousel' && (
+            {block.type === 'showcase' && (
+              <Card
+                title="Encabezado del carrusel"
+                description="El título que separa el video de las fotos. Déjalo vacío para no mostrarlo."
+              >
+                <Field label="Encabezado" name="heading" value={block.heading ?? ''} placeholder="Así se ve el proyecto" />
+              </Card>
+            )}
+
+            {(block.type === 'carousel' || block.type === 'showcase') && (
               <Card
                 title="Imágenes"
                 description="Se deslizan de lado. Deja la ruta vacía o marca eliminar para quitar una."
@@ -305,7 +315,7 @@ const orderInput =
     </form>
 
     {
-      (block.type === 'carousel' || block.type === 'video') && (
+      (block.type === 'carousel' || block.type === 'video' || block.type === 'showcase') && (
         <Card title="Imágenes" description="Sube una foto y pega la ruta que te devuelve en el campo de arriba.">
           <Uploader volver={HERE} />
         </Card>

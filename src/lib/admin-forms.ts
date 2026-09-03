@@ -15,7 +15,7 @@ export const text = (form: FormData, key: string, fallback = ''): string => {
 export const checkbox = (form: FormData, key: string): boolean => form.get(key) === 'on';
 
 const CTA_STYLES = ['whatsapp', 'lime', 'gold', 'outline'] as const;
-const BLOCK_TYPES = ['video', 'carousel', 'text', 'marquee'] as const;
+const BLOCK_TYPES = ['video', 'carousel', 'showcase', 'text', 'marquee'] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
 

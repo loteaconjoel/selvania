@@ -62,6 +62,20 @@ export interface CarouselBlock extends BlockBase {
   images: Media[];
 }
 
+/**
+ * Video y carrusel en una sola sección, con un encabezado entre los dos.
+ * Es la estructura que pide la maqueta para el bloque del proyecto: título,
+ * descripción, video, encabezado, carrusel y botón.
+ */
+export interface ShowcaseBlock extends BlockBase {
+  type: 'showcase';
+  source: VideoSource;
+  poster?: string;
+  /** Encabezado que separa el video del carrusel. */
+  heading?: string;
+  images: Media[];
+}
+
 /** Sección de texto con lista de puntos. */
 export interface TextBlock extends BlockBase {
   type: 'text';
@@ -87,7 +101,12 @@ export interface MarqueeBlock {
   items: MarqueeItem[];
 }
 
-export type Block = VideoBlock | CarouselBlock | TextBlock | MarqueeBlock;
+export type Block =
+  | VideoBlock
+  | CarouselBlock
+  | ShowcaseBlock
+  | TextBlock
+  | MarqueeBlock;
 
 export interface Theme {
   colors: {

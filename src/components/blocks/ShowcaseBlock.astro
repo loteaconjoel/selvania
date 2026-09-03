@@ -1,0 +1,101 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+import CtaButton from '../CtaButton.astro';
+import VideoPlayer from '../VideoPlayer.astro';
+import Carousel from '../Carousel.astro';
+import JungleBackdrop from '../JungleBackdrop.astro';
+import { surfaceOf } from '../../lib/surface';
+import type { ShowcaseBlock } from '../../data/types';
+
+interface Props {
+  block: ShowcaseBlock;
+  number: string;
+  alt: boolean;
+}
+
+const { block, number, alt } = Astro.props;
+const surface = surfaceOf(alt);
+const variant = block.id.charCodeAt(0) % 3;
+
+// El encabezado intermedio sigue el mismo par de tonos que el resto: sobre el
+// verde claro el texto va oscuro, que es el único que contrasta ahí.
+const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream';
+---
+
+{/* Un solo bloque con los seis componentes que pide la maqueta: título,
+    descripción, video, encabezado, carrusel y botón. Antes eran dos secciones
+    separadas, cada una con su propio título y su propio botón. */}
+<section
+  id={block.id}
+  class:list={[
+    'relative overflow-hidden py-16 sm:py-20 lg:py-24',
+    alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
+  ]}
+>
+  {alt && <JungleBackdrop variant={variant} />}
+
+  <div class="relative px-4 sm:px-6">
+    <div class="mx-auto max-w-6xl">
+      <SectionHeader
+        eyebrow={block.eyebrow}
+        title={block.title}
+        description={block.description}
+        surface={surface}
+      />
+    </div>
+  </div>
+
+  <div class="relative mt-10 px-4 sm:px-6">
+    <div class="mx-auto max-w-3xl">
+      <VideoPlayer
+        source={block.source}
+        poster={block.poster}
+        title={block.title}
+        surface={surface}
+      />
+    </div>
+  </div>
+
+  {
+    block.heading && (
+      <div class="relative mt-14 px-4 sm:px-6">
+        <h3
+          class:list={[
+            'mx-auto max-w-3xl text-center font-heading text-2xl font-bold sm:text-3xl',
+            headingTone,
+          ]}
+        >
+          {block.heading}
+        </h3>
+      </div>
+    )
+  }
+
+  {
+    block.images.length > 0 && (
+      <div class:list={['relative px-4 sm:px-6', block.heading ? 'mt-8' : 'mt-14']}>
+        <div class="mx-auto max-w-6xl">
+          <Carousel
+            images={block.images}
+            label={block.heading ?? block.title}
+            surface={surface}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    block.cta && (
+      <div class="relative mt-10 flex justify-center px-4 sm:px-6">
+        <CtaButton
+          cta={block.cta}
+          number={number}
+          surface={surface}
+          block={false}
+          class="w-full sm:w-auto"
+        />
+      </div>
+    )
+  }
+</section>
