@@ -148,6 +148,38 @@ const orderInput =
               </div>
             </Card>
 
+            {block.type === 'showcase' && (
+              <Card
+                title="Imagen de apertura"
+                description="Se muestra entera y a todo el ancho antes del video. Déjala vacía para no mostrarla."
+              >
+                <div class="flex flex-wrap gap-4">
+                  {block.banner?.src && (
+                    <img
+                      src={block.banner.src}
+                      alt=""
+                      class="h-28 w-20 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
+                    />
+                  )}
+                  <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
+                    <Field
+                      label="Ruta de la imagen"
+                      name="banner.src"
+                      value={block.banner?.src ?? ''}
+                      placeholder="https://.../media/principal.webp"
+                    />
+                    <Field
+                      label="Texto alternativo"
+                      name="banner.alt"
+                      value={block.banner?.alt ?? ''}
+                      placeholder="Qué dice y qué se ve en la imagen"
+                      hint="Importante si la imagen lleva texto: es lo único que leen los buscadores."
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {(block.type === 'video' || block.type === 'showcase') && (
               <Card title="Video">
                 <VideoFields prefix="video" source={block.source} poster={block.poster} posterName="poster" />

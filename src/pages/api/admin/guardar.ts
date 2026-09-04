@@ -197,6 +197,11 @@ export const POST: APIRoute = async ({ request }) => {
           block.poster = f.mediaUrl(f.text(form, 'poster')) || undefined;
           block.heading = f.text(form, 'heading') || undefined;
           block.images = readImages(form);
+
+          const bannerSrc = f.mediaUrl(f.text(form, 'banner.src'));
+          block.banner = bannerSrc
+            ? { src: bannerSrc, alt: f.text(form, 'banner.alt') }
+            : undefined;
         } else {
           block.bullets = readBullets(form);
         }

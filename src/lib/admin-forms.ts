@@ -36,10 +36,16 @@ export const hexColor = (value: string, fallback: string): string =>
 export const fontName = (value: string, fallback: string): string =>
   /^[A-Za-z0-9 ]{1,40}$/.test(value) ? value.trim() : fallback;
 
-/** Número de WhatsApp: solo dígitos, con código de país. */
+/**
+ * Número de WhatsApp: solo dígitos, con código de país.
+ *
+ * El mínimo son 10 dígitos a propósito. Un móvil peruano suelto tiene 9 y
+ * pasaba la validación, así que se guardaba sin el 51 delante y todos los
+ * botones abrían un chat con un número inexistente, sin avisar de nada.
+ */
 export const phone = (value: string, fallback: string): string => {
   const digits = value.replace(/\D/g, '');
-  return digits.length >= 8 && digits.length <= 15 ? digits : fallback;
+  return digits.length >= 10 && digits.length <= 15 ? digits : fallback;
 };
 
 /**

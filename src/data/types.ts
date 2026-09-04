@@ -69,6 +69,12 @@ export interface CarouselBlock extends BlockBase {
  */
 export interface ShowcaseBlock extends BlockBase {
   type: 'showcase';
+  /**
+   * Imagen a sangre que abre la sección, antes del video. Pensada para una
+   * pieza gráfica ya diseñada (un flyer), no para una foto: se muestra entera,
+   * sin recortar, porque recortarla le comería el texto.
+   */
+  banner?: Media;
   source: VideoSource;
   poster?: string;
   /** Encabezado que separa el video del carrusel. */
