@@ -57,7 +57,10 @@
     scroll-behavior: auto;
   }
 
-  *,
+  /* Se excluye lo marcado con data-motion="always": elementos cuyo movimiento
+     se decidió mantener siempre, pase lo que pase con el ajuste del sistema.
+     Sin esta exclusión, esta regla los congelaría igualmente. */
+  *:not([data-motion='always']),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

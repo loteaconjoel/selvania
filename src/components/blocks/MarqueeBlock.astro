@@ -19,7 +19,7 @@ const copies = [0, 1];
   data-marquee
   class="overflow-hidden border-y border-sv-jungle-deep/20 bg-sv-jungle py-4"
 >
-  <div class="sv-marquee-track flex w-max">
+  <div class="sv-marquee-track flex w-max" data-motion="always">
     {
       copies.map((copy) => (
         <ul class="flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
@@ -56,39 +56,26 @@ const copies = [0, 1];
     }
   }
 
-  /* Con el movimiento reducido activado en el sistema, la franja deja de
-     desplazarse. Antes se quedaba quieta a media frase, que parece un fallo;
-     ahora las frases se reparten en varias líneas y se lee como una banda
-     estática a propósito. La copia duplicada, que solo existe para que el
-     bucle no tenga costura, sobra aquí. */
+  /* DECISIÓN DEL CLIENTE: la franja se mueve siempre, también con el ajuste de
+     "reducir movimiento" activado en el sistema. Es parte de la identidad de la
+     página y así se pidió expresamente.
+
+     Hay que reafirmarla aquí porque global.css impone
+     `animation-duration: 0.01ms !important` sobre todos los elementos en ese
+     modo; sin esto la franja se congelaba. El selector de clase gana al
+     selector universal aun estando ambos marcados como !important.
+
+     Lo que esto implica: en Android el ajuste va atado al ahorro de batería, así
+     que la animación seguirá corriendo en teléfonos con la batería baja, y
+     tampoco se detendrá para quien lo haya activado por mareo con el
+     movimiento. Se asume a conciencia. */
   @media (prefers-reduced-motion: reduce) {
     .sv-marquee-track {
-      animation: none !important;
-      width: auto;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .sv-marquee-track > ul[aria-hidden='true'] {
-      display: none;
-    }
-
-    /* La lista lleva shrink-0 para que el bucle no la comprima. Aquí estorba:
-       sin poder encoger se sale del contenedor y el recorte deja ver una sola
-       frase. Se le devuelve la capacidad de encoger para que reparta las
-       frases en varias líneas. */
-    .sv-marquee-track > ul {
-      flex-shrink: 1;
-      min-width: 0;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.25rem 0;
-    }
-
-    /* Los puntos separan frases dentro de una tira continua. Apilada en
-       líneas no separan nada y además sobresalen del borde. */
-    .sv-marquee-track li > span[aria-hidden='true'] {
-      display: none;
+      animation-name: sv-marquee !important;
+      animation-duration: 45s !important;
+      animation-timing-function: linear !important;
+      animation-iteration-count: infinite !important;
+      animation-play-state: running !important;
     }
   }
 </style>
