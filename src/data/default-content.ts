@@ -44,11 +44,6 @@ export const defaultContent: SiteContent = {
           'Hola, vi la página de Selvania Park y quiero agendar una visita al proyecto.',
         style: 'whatsapp',
       },
-      {
-        label: 'Hablar con un asesor',
-        message: 'Hola, vi la página de Selvania Park y quiero hablar con un asesor.',
-        style: 'outline',
-      },
     ],
   },
 
@@ -105,7 +100,7 @@ export const defaultContent: SiteContent = {
         src: `${FOTO}/principal.webp`,
         alt: 'Urbanización Los Cocos: lotes de 190 m² en el distrito de Sangani, a 6 min del parque de Pichanaki. Compra y venta notarial, con luz y agua. Precio S/ 40,000 con facilidades.',
       },
-      videoHeading: 'El proyecto en video',
+      videoHeading: 'Recorre el proyecto por dentro',
       source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
       heading: 'Así se ve hoy el proyecto',
       images: [
