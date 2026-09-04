@@ -17,14 +17,23 @@ const { blocks, number } = Astro.props;
 const visible = blocks.filter((block) => block.enabled);
 
 // El fondo alterna entre los dos verdes para separar una sección de la
-// siguiente. Las franjas no entran en la cuenta: tienen fondo propio y romperían
-// la alternancia de las secciones que las rodean.
+// siguiente, salvo que la sección haya elegido el suyo desde el panel.
+// Las franjas no entran en la alternancia: son bandas delgadas y la romperían
+// para las secciones que las rodean.
 let contentIndex = 0;
 const prepared = visible.map((block) => {
-  if (block.type === 'marquee') return { block, alt: false };
+  if (block.type === 'marquee') {
+    // La banda va en verde medio salvo que se pida oscura.
+    return { block, alt: block.surface !== 'dark' };
+  }
+
   // Empieza en oscuro para no repetir el fondo del hero.
-  const alt = contentIndex % 2 === 1;
+  const automatico = contentIndex % 2 === 1;
   contentIndex += 1;
+
+  const alt =
+    block.surface === 'light' ? true : block.surface === 'dark' ? false : automatico;
+
   return { block, alt };
 });
 ---
@@ -33,7 +42,7 @@ const prepared = visible.map((block) => {
   prepared.map(({ block, alt }) => {
     switch (block.type) {
       case 'marquee':
-        return <MarqueeBlock block={block} />;
+        return <MarqueeBlock block={block} alt={alt} />;
       case 'video':
         return <VideoBlock block={block} number={number} alt={alt} />;
       case 'carousel':

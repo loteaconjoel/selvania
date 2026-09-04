@@ -27,6 +27,17 @@ export interface Bullet {
   text: string;
 }
 
+/**
+ * Fondo de la sección.
+ * - auto: alterna con la sección anterior, que es el comportamiento por defecto.
+ * - dark / light: lo fija a mano.
+ *
+ * Solo se ofrecen los dos fondos de la paleta y no un color libre: son los
+ * únicos con el contraste ya comprobado contra los textos y los botones. Un
+ * color cualquiera dejaría textos ilegibles sin avisar.
+ */
+export type BlockSurface = 'auto' | 'dark' | 'light';
+
 interface BlockBase {
   /** Identificador estable, usado como ancla (#id) y como key de React/Astro. */
   id: string;
@@ -37,6 +48,8 @@ interface BlockBase {
   description?: string;
   /** Si es false, la sección no se renderiza. El admin puede ocultar sin borrar. */
   enabled: boolean;
+  /** Fondo propio. Si falta o es 'auto', alterna con la sección anterior. */
+  surface?: BlockSurface;
   cta?: Cta;
 }
 
@@ -106,6 +119,8 @@ export interface MarqueeBlock {
   enabled: boolean;
   /** Nombre interno, solo para reconocerla en el panel de administración. */
   label: string;
+  /** Fondo de la banda. Por defecto va en verde medio. */
+  surface?: BlockSurface;
   items: MarqueeItem[];
 }
 

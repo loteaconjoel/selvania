@@ -1,40 +1,119 @@
 ---
-interface Props {
-  volver: string;
-}
-
-const { volver } = Astro.props;
+/**
+ * Sube una imagen sin ser un <form>.
+ *
+ * Antes lo era, y al colocarlo dentro del formulario de edición quedaban dos
+ * formularios anidados. Eso no es HTML válido: el navegador cierra el de fuera
+ * al encontrar el de dentro, así que todo lo que venía después dejaba de
+ * enviarse y al guardar se perdían fotos, botones y encabezados sin avisar.
+ *
+ * Enviando por su cuenta también se gana algo: la página ya no se recarga al
+ * subir, así que no se pierde lo que se estuviera escribiendo en el formulario.
+ */
 ---
 
-<form
-  method="POST"
-  action="/api/admin/guardar"
-  enctype="multipart/form-data"
-  class="flex flex-wrap items-center gap-3 rounded-xl bg-sv-jungle-deep/60 p-4 ring-1 ring-sv-lime/10"
+<div
+  data-uploader
+  class="flex flex-wrap items-end gap-3 rounded-xl bg-sv-jungle-deep/60 p-4 ring-1 ring-sv-lime/10"
 >
-  <input type="hidden" name="accion" value="imagen" />
-  <input type="hidden" name="volver" value={volver} />
-
   <div class="min-w-0 flex-1">
     <span class="text-xs font-semibold tracking-wide text-sv-cream/70 uppercase">
       Subir una imagen
     </span>
     <input
       type="file"
-      name="archivo"
+      data-archivo
       accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
-      required
       class="mt-1.5 block w-full text-sm text-sv-cream/70 file:mr-3 file:rounded-full file:border-0 file:bg-sv-lime/15 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-sv-lime hover:file:bg-sv-lime/25"
     />
-    <span class="mt-1.5 block text-xs text-sv-cream/45">
-      JPG, PNG, WebP, AVIF o GIF, hasta 8 MB. Al subirla te damos su ruta para pegarla arriba.
+    <span data-estado class="mt-1.5 block text-xs text-sv-cream/45">
+      JPG, PNG, WebP, AVIF o GIF, hasta 8 MB. Al subirla se copia su ruta y
+      aparece en la galería de abajo.
     </span>
   </div>
 
   <button
-    type="submit"
-    class="rounded-full border border-sv-lime/35 px-4 py-2 text-sm font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+    type="button"
+    data-subir
+    class="rounded-full border border-sv-lime/35 px-4 py-2 text-sm font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep disabled:opacity-50"
   >
     Subir
   </button>
-</form>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-uploader]').forEach((caja) => {
+    const archivo = caja.querySelector<HTMLInputElement>('[data-archivo]');
+    const boton = caja.querySelector<HTMLButtonElement>('[data-subir]');
+    const estado = caja.querySelector<HTMLElement>('[data-estado]');
+    if (!archivo || !boton || !estado) return;
+
+    const decir = (mensaje: string, error = false) => {
+      estado.textContent = mensaje;
+      estado.classList.toggle('text-red-300', error);
+      estado.classList.toggle('text-sv-lime', !error && mensaje.startsWith('Lista'));
+    };
+
+    boton.addEventListener('click', async () => {
+      const fichero = archivo.files?.[0];
+      if (!fichero) {
+        decir('Elige una imagen primero.', true);
+        return;
+      }
+
+      boton.disabled = true;
+      decir('Subiendo…');
+
+      try {
+        const datos = new FormData();
+        datos.append('accion', 'imagen');
+        datos.append('volver', '/admin');
+        // Pide la respuesta en JSON para quedarse en la página en vez de seguir
+        // la redirección que usa el envío normal de formulario.
+        datos.append('json', '1');
+        datos.append('archivo', fichero);
+
+        const respuesta = await fetch('/api/admin/guardar', { method: 'POST', body: datos });
+        const cuerpo = await respuesta.json();
+
+        if (!respuesta.ok || !cuerpo.url) {
+          decir(cuerpo.error ?? 'No se pudo subir la imagen.', true);
+          return;
+        }
+
+        try {
+          await navigator.clipboard.writeText(cuerpo.url);
+          decir('Lista. Su ruta ya está copiada: pégala en el campo que quieras.');
+        } catch {
+          decir(`Lista: ${cuerpo.url}`);
+        }
+
+        // Se añade a la galería al momento, sin recargar, para no perder lo que
+        // se estuviera escribiendo en el formulario.
+        const galeria = document.querySelector<HTMLElement>('[data-galeria]');
+        if (galeria) {
+          const plantilla = galeria.querySelector<HTMLElement>('li');
+          if (plantilla) {
+            const copia = plantilla.cloneNode(true) as HTMLElement;
+            const boton = copia.querySelector<HTMLButtonElement>('[data-copiar]');
+            const imagen = copia.querySelector<HTMLImageElement>('img');
+            const nombre = copia.querySelector<HTMLElement>('[data-nombre]');
+            if (boton && imagen) {
+              boton.dataset.copiar = cuerpo.url;
+              imagen.src = cuerpo.url;
+              if (nombre) nombre.textContent = cuerpo.url.split('/').pop() ?? '';
+              galeria.prepend(copia);
+              window.dispatchEvent(new Event('galeria-actualizada'));
+            }
+          }
+        }
+
+        archivo.value = '';
+      } catch {
+        decir('No se pudo subir la imagen. Revisa la conexión.', true);
+      } finally {
+        boton.disabled = false;
+      }
+    });
+  });
+</script>

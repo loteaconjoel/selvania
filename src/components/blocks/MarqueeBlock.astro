@@ -4,9 +4,26 @@ import type { MarqueeBlock } from '../../data/types';
 
 interface Props {
   block: MarqueeBlock;
+  alt: boolean;
 }
 
-const { block } = Astro.props;
+const { block, alt } = Astro.props;
+
+// Sobre el verde medio el contenido va oscuro (5.34:1) y sobre el verde profundo
+// va en lima (10.16:1). Son las dos combinaciones con contraste comprobado.
+const tono = alt
+  ? {
+      banda: 'border-sv-jungle-deep/20 bg-sv-jungle',
+      icono: 'text-sv-jungle-deep',
+      texto: 'text-sv-jungle-deep',
+      punto: 'bg-sv-jungle-deep/50',
+    }
+  : {
+      banda: 'border-sv-lime/20 bg-sv-jungle-deep',
+      icono: 'text-sv-lime',
+      texto: 'text-sv-cream',
+      punto: 'bg-sv-lime/50',
+    };
 
 // Se renderiza la lista dos veces: cuando la pista se ha desplazado la mitad de
 // su ancho, la segunda copia está exactamente donde arrancó la primera, así que
@@ -17,7 +34,7 @@ const copies = [0, 1];
 <div
   id={block.id}
   data-marquee
-  class="overflow-hidden border-y border-sv-jungle-deep/20 bg-sv-jungle py-4"
+  class:list={['overflow-hidden border-y py-4', tono.banda]}
 >
   <div class="sv-marquee-track flex w-max" data-motion="always">
     {
@@ -25,11 +42,11 @@ const copies = [0, 1];
         <ul class="flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
           {block.items.map((item) => (
             <li class="flex items-center gap-3 px-5">
-              <Icon name={item.icon} class="h-5 w-5 shrink-0 text-sv-jungle-deep" />
-              <span class="font-heading text-sm font-bold tracking-wider whitespace-nowrap text-sv-jungle-deep uppercase">
+              <Icon name={item.icon} class:list={['h-5 w-5 shrink-0', tono.icono]} />
+              <span class:list={['font-heading text-sm font-bold tracking-wider whitespace-nowrap uppercase', tono.texto]}>
                 {item.text}
               </span>
-              <span class="ml-5 h-1.5 w-1.5 rounded-full bg-sv-jungle-deep/50" aria-hidden="true" />
+              <span class:list={['ml-5 h-1.5 w-1.5 rounded-full', tono.punto]} aria-hidden="true" />
             </li>
           ))}
         </ul>

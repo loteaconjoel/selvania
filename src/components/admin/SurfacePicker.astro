@@ -1,0 +1,70 @@
+---
+import type { BlockSurface, Theme } from '../../data/types';
+
+interface Props {
+  value: BlockSurface;
+  colors: Theme['colors'];
+  /** La franja no alterna con nada: su opción automática es el verde medio. */
+  autoLabel?: string;
+  autoHint?: string;
+}
+
+const {
+  value,
+  colors,
+  autoLabel = 'Automático',
+  autoHint = 'Alterna con la sección anterior',
+} = Astro.props;
+
+const opciones = [
+  {
+    value: 'auto' as const,
+    label: autoLabel,
+    hint: autoHint,
+    // Mitad y mitad: se ve de un vistazo que puede salir cualquiera de los dos.
+    fondo: `linear-gradient(135deg, ${colors.jungleDeep} 0 50%, ${colors.jungle} 50% 100%)`,
+  },
+  {
+    value: 'dark' as const,
+    label: 'Verde profundo',
+    hint: 'Texto claro encima',
+    fondo: colors.jungleDeep,
+  },
+  {
+    value: 'light' as const,
+    label: 'Verde medio',
+    hint: 'Texto oscuro encima',
+    fondo: colors.jungle,
+  },
+];
+---
+
+<div class="grid gap-3 sm:grid-cols-3">
+  {
+    opciones.map((opcion) => (
+      <label class="block cursor-pointer">
+        <input
+          type="radio"
+          name="surface"
+          value={opcion.value}
+          checked={value === opcion.value}
+          class="peer sr-only"
+        />
+        <span class="block rounded-xl p-3 ring-1 ring-sv-lime/15 transition peer-checked:bg-sv-lime/10 peer-checked:ring-2 peer-checked:ring-sv-lime peer-focus-visible:ring-2 peer-focus-visible:ring-sv-lime">
+          <span
+            class="block h-12 rounded-lg ring-1 ring-sv-cream/10"
+            style={`background:${opcion.fondo}`}
+          />
+          <span class="mt-2.5 block text-sm font-semibold text-sv-cream">{opcion.label}</span>
+          <span class="mt-0.5 block text-xs text-sv-cream/50">{opcion.hint}</span>
+        </span>
+      </label>
+    ))
+  }
+</div>
+
+<p class="mt-4 text-xs text-sv-cream/45">
+  Solo estos dos fondos, y no un color libre, porque son los únicos con el
+  contraste ya comprobado contra los textos y los botones. Con un color
+  cualquiera, el texto podría quedar ilegible sin que nada avise.
+</p>

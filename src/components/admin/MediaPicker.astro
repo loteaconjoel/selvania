@@ -1,0 +1,33 @@
+---
+import Uploader from './Uploader.astro';
+import MediaLibrary from './MediaLibrary.astro';
+---
+
+{/* Va plegado y pegado a los campos de imagen: antes vivía al final de la
+    página, lejos de donde hacía falta, y había que subir, bajar y volver. */}
+<details class="mt-5 rounded-xl bg-sv-jungle-deep/60 ring-1 ring-sv-lime/10">
+  <summary
+    class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-sv-lime"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path>
+      <path d="m3 16 5-5 4 4 3-3 6 6"></path>
+      <path d="M9.5 9.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path>
+    </svg>
+    Subir una foto o elegir una ya subida
+  </summary>
+
+  <div class="border-t border-sv-lime/10 p-4">
+    <Uploader />
+    <MediaLibrary />
+  </div>
+</details>

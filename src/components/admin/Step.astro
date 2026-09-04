@@ -1,0 +1,71 @@
+---
+interface Props {
+  /** Número de orden. Coincide con el orden en que se ve en la página. */
+  n: number;
+  title: string;
+  /** Dónde aparece esto en la web. Es lo que evita editar a ciegas. */
+  where?: string;
+  description?: string;
+  /** Resumen de lo que hay ahora: "3 fotos", "sin imagen". */
+  badge?: string;
+  /** Marca los apartados que se pueden dejar vacíos. */
+  optional?: boolean;
+}
+
+const { n, title, where, description, badge, optional = false } = Astro.props;
+---
+
+<section class="rounded-2xl bg-sv-cream/5 p-5 ring-1 ring-sv-lime/15 sm:p-6">
+  <header class="flex items-start gap-3.5">
+    <span
+      class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sv-lime font-heading text-sm font-bold text-sv-jungle-deep"
+    >
+      {n}
+    </span>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <h2 class="font-heading text-lg font-bold text-sv-cream">{title}</h2>
+        {
+          badge && (
+            <span class="rounded-full bg-sv-jungle-deep/70 px-2.5 py-0.5 text-xs font-medium text-sv-cream/70">
+              {badge}
+            </span>
+          )
+        }
+        {
+          optional && (
+            <span class="text-xs text-sv-cream/40">opcional</span>
+          )
+        }
+      </div>
+
+      {
+        where && (
+          <p class="mt-1 flex items-start gap-1.5 text-xs text-sv-lime/80">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mt-px h-3.5 w-3.5 shrink-0"
+              aria-hidden="true"
+            >
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+            </svg>
+            {where}
+          </p>
+        )
+      }
+
+      {description && <p class="mt-2 text-sm text-sv-cream/55">{description}</p>}
+    </div>
+  </header>
+
+  <div class="mt-5">
+    <slot />
+  </div>
+</section>

@@ -1,5 +1,5 @@
 import { icons, type IconName } from './icons';
-import type { Cta, VideoSource } from '../data/types';
+import type { BlockSurface, Cta, VideoSource } from '../data/types';
 
 /**
  * Todo lo que llega de un formulario es texto sin garantías, aunque venga de una
@@ -24,6 +24,12 @@ export const isBlockType = (value: string): value is BlockType =>
 
 export const ctaStyle = (value: string): Cta['style'] =>
   (CTA_STYLES as readonly string[]).includes(value) ? (value as Cta['style']) : 'whatsapp';
+
+const SURFACES = ['auto', 'dark', 'light'] as const;
+
+/** Fondo de una sección. Cualquier valor raro cae en 'auto'. */
+export const blockSurface = (value: string): BlockSurface =>
+  (SURFACES as readonly string[]).includes(value) ? (value as BlockSurface) : 'auto';
 
 export const iconName = (value: string): IconName =>
   value in icons ? (value as IconName) : 'escudo';

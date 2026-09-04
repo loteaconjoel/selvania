@@ -120,16 +120,44 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (action === 'imagen') {
+      // El subidor del panel envía por su cuenta y espera JSON, para no
+      // recargar la página y no perder lo que se esté escribiendo.
+      const enJson = f.text(form, 'json') === '1';
+      const json = (cuerpo: object, status = 200) =>
+        new Response(JSON.stringify(cuerpo), {
+          status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+
       const file = form.get('archivo');
-      if (!(file instanceof File) || file.size === 0) return back(to, '?e=sin-archivo');
-      const url = await saveMedia(file);
-      return back(to, `?ok=imagen&url=${encodeURIComponent(url)}`);
+      if (!(file instanceof File) || file.size === 0) {
+        return enJson ? json({ error: 'No se recibió ningún archivo.' }, 400) : back(to, '?e=sin-archivo');
+      }
+
+      try {
+        const url = await saveMedia(file);
+        return enJson ? json({ url }) : back(to, `?ok=imagen&url=${encodeURIComponent(url)}`);
+      } catch (error) {
+        const motivo = error instanceof Error ? error.message : 'guardar';
+        if (!enJson) throw error;
+        const mensaje =
+          motivo === 'formato'
+            ? 'Formato no admitido. Usa JPG, PNG, WebP, AVIF o GIF.'
+            : motivo === 'tamano'
+              ? 'La imagen pesa más de 8 MB.'
+              : 'No se pudo guardar la imagen.';
+        return json({ error: mensaje }, 400);
+      }
     }
 
     const content: SiteContent = await readContent();
 
     switch (action) {
       case 'general': {
+        if (f.text(form, 'formulario') !== 'completo') {
+          return back(to, '?e=incompleto');
+        }
+
         content.seo.title = f.text(form, 'seo.title') || content.seo.title;
         content.seo.description = f.text(form, 'seo.description');
         content.seo.ogImage = f.mediaUrl(f.text(form, 'seo.ogImage'), content.seo.ogImage);
@@ -170,11 +198,19 @@ export const POST: APIRoute = async ({ request }) => {
       }
 
       case 'bloque': {
+        // El formulario termina con una marca. Si no llega, es que el navegador
+        // lo cortó por el camino y faltan campos: guardar así borraría todo lo
+        // que viniera después del corte. Mejor no guardar nada y avisar.
+        if (f.text(form, 'formulario') !== 'completo') {
+          return back(to, '?e=incompleto');
+        }
+
         const id = f.text(form, 'id');
         const block = content.blocks.find((candidate) => candidate.id === id);
         if (!block) return back(to, '?e=no-existe');
 
         block.enabled = f.checkbox(form, 'enabled');
+        block.surface = f.blockSurface(f.text(form, 'surface'));
 
         if (block.type === 'marquee') {
           block.label = f.text(form, 'label') || block.label;

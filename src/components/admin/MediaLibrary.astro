@@ -14,7 +14,7 @@ const imagenes = await listMedia();
         Pulsa una para copiar su ruta y pégala en el campo que quieras.
       </p>
 
-      <ul class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ul data-galeria class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {imagenes.map((imagen) => (
           <li>
             <button
@@ -31,7 +31,7 @@ const imagenes = await listMedia();
                 class="aspect-4/3 w-full object-cover"
               />
               <span class="flex items-center justify-between gap-2 px-2.5 py-2">
-                <span class="truncate text-xs text-sv-cream/70">{imagen.name}</span>
+                <span data-nombre class="truncate text-xs text-sv-cream/70">{imagen.name}</span>
                 <span
                   data-etiqueta
                   class="shrink-0 text-xs font-semibold text-sv-lime opacity-0 transition group-hover:opacity-100"
@@ -48,33 +48,36 @@ const imagenes = await listMedia();
 }
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>('[data-copiar]').forEach((boton) => {
+  // Se escucha en el documento y no en cada botón: así las imágenes que el
+  // subidor añade sobre la marcha responden igual, sin volver a enlazar nada.
+  document.addEventListener('click', async (evento) => {
+    const objetivo = evento.target as HTMLElement | null;
+    const boton = objetivo?.closest<HTMLButtonElement>('[data-copiar]');
+    if (!boton) return;
+
+    const ruta = boton.dataset.copiar ?? '';
     const etiqueta = boton.querySelector<HTMLElement>('[data-etiqueta]');
 
-    boton.addEventListener('click', async () => {
-      const ruta = boton.dataset.copiar ?? '';
+    try {
+      await navigator.clipboard.writeText(ruta);
+    } catch {
+      // El portapapeles falla en navegadores antiguos o sin HTTPS. Entonces se
+      // deja la ruta seleccionada para copiarla a mano.
+      const campo = document.createElement('input');
+      campo.value = ruta;
+      campo.setAttribute('readonly', '');
+      campo.className = 'fixed top-0 left-0 opacity-0';
+      document.body.append(campo);
+      campo.select();
+      window.setTimeout(() => campo.remove(), 8000);
+    }
 
-      try {
-        await navigator.clipboard.writeText(ruta);
-      } catch {
-        // El portapapeles falla si el navegador es antiguo o la página no va por
-        // HTTPS. En ese caso se deja la ruta seleccionada para copiarla a mano.
-        const campo = document.createElement('input');
-        campo.value = ruta;
-        campo.setAttribute('readonly', '');
-        campo.className = 'fixed top-0 left-0 opacity-0';
-        document.body.append(campo);
-        campo.select();
-        window.setTimeout(() => campo.remove(), 8000);
-      }
-
-      if (!etiqueta) return;
-      etiqueta.textContent = '¡Copiada!';
-      etiqueta.classList.add('opacity-100');
-      window.setTimeout(() => {
-        etiqueta.textContent = 'Copiar';
-        etiqueta.classList.remove('opacity-100');
-      }, 1600);
-    });
+    if (!etiqueta) return;
+    etiqueta.textContent = '¡Copiada!';
+    etiqueta.classList.add('opacity-100');
+    window.setTimeout(() => {
+      etiqueta.textContent = 'Copiar';
+      etiqueta.classList.remove('opacity-100');
+    }, 1600);
   });
 </script>

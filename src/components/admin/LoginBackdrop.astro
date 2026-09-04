@@ -1,0 +1,109 @@
+---
+/**
+ * Vegetación de fondo para la pantalla de acceso.
+ *
+ * Todo va dibujado a línea con el mismo trazo que los íconos del sitio, en vez
+ * de siluetas rellenas: mantiene el aire del resto de la página y aguanta
+ * cualquier tamaño sin pesar nada, porque son cuatro trazados repetidos.
+ *
+ * Las plantas se anclan a los bordes y nunca al centro, para que la tarjeta
+ * quede siempre sobre fondo limpio y el texto se lea sin competencia.
+ */
+
+const plantas = [
+  { forma: 'monstera', pos: '-top-16 -left-20 w-64 sm:w-80', rot: -18, op: 0.14 },
+  { forma: 'palma', pos: 'top-1/4 -right-24 w-72 sm:w-96', rot: 12, op: 0.11 },
+  { forma: 'helecho', pos: '-bottom-10 -left-16 w-56 sm:w-72', rot: 8, op: 0.12 },
+  { forma: 'monstera', pos: '-bottom-24 -right-16 w-56 sm:w-72', rot: 165, op: 0.1 },
+  { forma: 'hoja', pos: 'top-8 left-1/3 w-24 sm:w-32', rot: 35, op: 0.07 },
+  { forma: 'hoja', pos: 'bottom-1/4 right-1/4 w-20 sm:w-28', rot: -50, op: 0.06 },
+] as const;
+
+const trazados: Record<string, { viewBox: string; d: string[] }> = {
+  // Hoja de costilla de Adán: contorno ancho, nervio central y nervaduras que
+  // llegan al borde, que es lo que la hace reconocible dibujada a línea.
+  monstera: {
+    viewBox: '0 0 120 124',
+    d: [
+      'M60 6C22 26 6 64 24 98c14 24 58 24 72 0C114 64 98 26 60 6Z',
+      'M60 14v98',
+      'M60 38C46 36 35 30 28 21',
+      'M60 38c14-2 25-8 32-17',
+      'M60 64C43 62 30 55 21 44',
+      'M60 64c17-2 30-9 39-20',
+      'M60 90c-14-2-25-8-32-17',
+      'M60 90c14-2 25-8 32-17',
+    ],
+  },
+  // Fronda de palmera: un tallo curvo con foliolos a ambos lados.
+  palma: {
+    viewBox: '0 0 160 70',
+    d: [
+      'M4 64C44 54 104 32 156 6',
+      'M22 59c-4-10-3-19 3-27',
+      'M40 53c-4-11-2-21 5-29',
+      'M58 46c-3-12 0-22 8-30',
+      'M76 39c-2-12 2-22 11-29',
+      'M96 30c-1-12 4-22 13-28',
+      'M118 20c1-12 7-21 16-26',
+      'M28 62c8-7 17-11 27-12',
+      'M48 55c8-8 17-13 27-14',
+      'M70 46c9-8 18-13 28-15',
+      'M94 36c9-9 19-14 29-16',
+    ],
+  },
+  // Helecho: raquis recto con pínnulas cortas que se acortan hacia la punta.
+  helecho: {
+    viewBox: '0 0 90 140',
+    d: [
+      'M45 136V10',
+      'M45 118c-11 1-19-3-25-12M45 118c11 1 19-3 25-12',
+      'M45 98c-10 1-18-3-23-11M45 98c10 1 18-3 23-11',
+      'M45 78c-9 1-16-3-21-10M45 78c9 1 16-3 21-10',
+      'M45 58c-8 1-14-2-18-9M45 58c8 1 14-2 18-9',
+      'M45 40c-6 1-11-2-15-8M45 40c6 1 11-2 15-8',
+      'M45 24c-5 0-8-2-11-6M45 24c5 0 8-2 11-6',
+    ],
+  },
+  // Hoja simple, la misma del resto del sitio, para los acentos pequeños.
+  hoja: {
+    viewBox: '0 0 100 140',
+    d: [
+      'M50 4C22 34 12 84 50 136 88 84 78 34 50 4Z',
+      'M50 12V130',
+      'M50 40 26 29M50 40l24-11M50 68 21 57M50 68l29-11M50 96 27 89M50 96l23-7',
+    ],
+  },
+};
+---
+
+<div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+  {/* Resplandor tras la tarjeta: separa el centro del fondo sin dibujar nada. */}
+  <div
+    class="absolute top-1/2 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sv-jungle/25 blur-3xl"
+  >
+  </div>
+
+  {
+    plantas.map((planta) => {
+      const trazado = trazados[planta.forma];
+      return (
+        <svg
+          class:list={['absolute text-sv-lime', planta.pos]}
+          style={`transform: rotate(${planta.rot}deg); opacity: ${planta.op}`}
+          viewBox={trazado.viewBox}
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          focusable="false"
+        >
+          {trazado.d.map((d) => (
+            <path d={d} />
+          ))}
+        </svg>
+      );
+    })
+  }
+</div>

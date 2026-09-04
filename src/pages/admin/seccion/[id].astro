@@ -2,15 +2,16 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Nav from '../../../components/admin/Nav.astro';
 import Notice from '../../../components/admin/Notice.astro';
-import Card from '../../../components/admin/Card.astro';
+import Step from '../../../components/admin/Step.astro';
 import Field from '../../../components/admin/Field.astro';
 import Select from '../../../components/admin/Select.astro';
-import Uploader from '../../../components/admin/Uploader.astro';
-import MediaLibrary from '../../../components/admin/MediaLibrary.astro';
+import MediaPicker from '../../../components/admin/MediaPicker.astro';
+import SurfacePicker from '../../../components/admin/SurfacePicker.astro';
 import VideoFields from '../../../components/admin/VideoFields.astro';
 import Icon from '../../../components/Icon.astro';
 import { readContent } from '../../../lib/content-store';
 import { icons } from '../../../lib/icons';
+import type { Block } from '../../../data/types';
 
 export const prerender = false;
 
@@ -28,17 +29,121 @@ const iconOptions = Object.keys(icons).map((name) => ({ value: name, label: name
 const ctaStyles = [
   { value: 'whatsapp', label: 'Verde WhatsApp' },
   { value: 'lime', label: 'Verde lima' },
-  { value: 'gold', label: 'Dorado' },
+  { value: 'gold', label: 'Verde claro' },
   { value: 'outline', label: 'Solo contorno' },
 ];
 
 const typeLabels = {
-  video: 'Video',
-  carousel: 'Carrusel de imágenes',
-  showcase: 'Video + carrusel',
-  text: 'Texto con puntos',
+  video: 'Sección con video',
+  carousel: 'Sección con carrusel de fotos',
+  showcase: 'Sección con video y carrusel',
+  text: 'Sección de texto con puntos',
   marquee: 'Franja en movimiento',
 } as const;
+
+/**
+ * Los apartados de cada tipo, en el mismo orden en que se ven en la página.
+ * De aquí salen tanto la numeración de los pasos como el índice de arriba, así
+ * que no pueden descuadrarse entre sí.
+ */
+const pasos =
+  block.type === 'marquee'
+    ? (['nombre', 'frases', 'fondo'] as const)
+    : block.type === 'showcase'
+      ? ([
+          'encabezado',
+          'apertura',
+          'tituloVideo',
+          'video',
+          'tituloFotos',
+          'fotos',
+          'boton',
+          'fondo',
+        ] as const)
+      : block.type === 'video'
+        ? (['encabezado', 'video', 'boton', 'fondo'] as const)
+        : block.type === 'carousel'
+          ? (['encabezado', 'fotos', 'boton', 'fondo'] as const)
+          : (['encabezado', 'puntos', 'boton', 'fondo'] as const);
+
+const n = (clave: string) => pasos.indexOf(clave as never) + 1;
+
+const nombres: Record<string, string> = {
+  nombre: 'Nombre interno',
+  frases: 'Frases que se desplazan',
+  encabezado: 'Antetítulo, título y descripción',
+  apertura: 'Imagen de apertura',
+  tituloVideo: 'Encabezado sobre el video',
+  video: 'Video',
+  tituloFotos: 'Encabezado sobre las fotos',
+  fotos: 'Carrusel de fotos',
+  puntos: 'Puntos con ícono',
+  boton: 'Botón de WhatsApp',
+  fondo: 'Fondo de la sección',
+};
+
+/** Qué hay ahora mismo en cada apartado. Es el desglose del índice de arriba. */
+function estadoDe(block: Block, clave: string): { texto: string; lleno: boolean } {
+  const vacio = { texto: 'Vacío', lleno: false };
+
+  if (block.type === 'marquee') {
+    if (clave === 'nombre') return { texto: block.label, lleno: true };
+    if (clave === 'frases') {
+      return block.items.length > 0
+        ? { texto: `${block.items.length} frases`, lleno: true }
+        : vacio;
+    }
+  } else {
+    if (clave === 'encabezado') return { texto: block.title, lleno: true };
+    if (clave === 'boton') {
+      return block.cta ? { texto: block.cta.label, lleno: true } : { texto: 'Sin botón', lleno: false };
+    }
+  }
+
+  if (clave === 'fondo') {
+    const modo = block.surface ?? 'auto';
+    const etiqueta =
+      modo === 'dark' ? 'Verde profundo' : modo === 'light' ? 'Verde medio' : 'Automático';
+    return { texto: etiqueta, lleno: true };
+  }
+
+  if (block.type === 'showcase') {
+    if (clave === 'apertura') {
+      return block.banner?.src ? { texto: 'Puesta', lleno: true } : { texto: 'Sin imagen', lleno: false };
+    }
+    if (clave === 'tituloVideo') {
+      return block.videoHeading ? { texto: block.videoHeading, lleno: true } : vacio;
+    }
+    if (clave === 'tituloFotos') {
+      return block.heading ? { texto: block.heading, lleno: true } : vacio;
+    }
+  }
+
+  if (clave === 'video' && (block.type === 'video' || block.type === 'showcase')) {
+    return block.source.kind === 'youtube'
+      ? {
+          texto: block.source.youtubeId ? 'YouTube' : 'Sin video',
+          lleno: Boolean(block.source.youtubeId),
+        }
+      : { texto: 'Archivo propio', lleno: true };
+  }
+
+  if (clave === 'fotos' && (block.type === 'carousel' || block.type === 'showcase')) {
+    return block.images.length > 0
+      ? { texto: `${block.images.length} fotos`, lleno: true }
+      : { texto: 'Sin fotos', lleno: false };
+  }
+
+  if (clave === 'puntos' && block.type === 'text') {
+    return block.bullets.length > 0
+      ? { texto: `${block.bullets.length} puntos`, lleno: true }
+      : vacio;
+  }
+
+  return vacio;
+}
+
+const estado = (clave: string) => estadoDe(block, clave);
 
 // Cada lista se pinta con una fila vacía al final para poder añadir un elemento.
 const withBlank = <T,>(items: T[]) => [
@@ -50,23 +155,28 @@ const rowBox = 'rounded-xl bg-sv-jungle-deep/60 p-4 ring-1 ring-sv-lime/10';
 const deleteLabel = 'flex items-center gap-2 text-xs font-semibold text-red-300';
 const orderInput =
   'w-16 rounded-lg bg-sv-cream/5 px-2 py-1 text-sm text-sv-cream ring-1 ring-sv-lime/20 outline-none focus:ring-2 focus:ring-sv-lime';
+
+const nombreVisible = block.type === 'marquee' ? block.label : block.title;
 ---
 
-<AdminLayout title="Editar sección">
+<AdminLayout title={nombreVisible}>
   <Nav admin={Astro.locals.admin} />
 
   <div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
     <Notice />
 
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <a href="/admin" class="text-xs text-sv-cream/50 underline-offset-4 hover:text-sv-lime hover:underline">
+    <header class="flex flex-wrap items-start justify-between gap-4">
+      <div class="min-w-0">
+        <a
+          href="/admin"
+          class="text-xs text-sv-cream/50 underline-offset-4 hover:text-sv-lime hover:underline"
+        >
           ← Volver a las secciones
         </a>
-        <h1 class="mt-1 font-heading text-xl text-sv-cream">
-          {typeLabels[block.type]}{' '}
-          <span class="text-sv-cream/35">#{block.id}</span>
-        </h1>
+        <h1 class="mt-1.5 font-heading text-2xl text-sv-cream">{nombreVisible}</h1>
+        <p class="mt-1 text-sm text-sv-cream/50">
+          {typeLabels[block.type]} · <code class="text-xs">#{block.id}</code>
+        </p>
       </div>
 
       <a
@@ -77,208 +187,95 @@ const orderInput =
       >
         Ver en la web
       </a>
-    </div>
+    </header>
 
-    <form method="POST" action="/api/admin/guardar" class="space-y-6">
+    {/* Índice: qué lleva esta sección y qué hay puesto en cada apartado. */}
+    <nav class="rounded-2xl bg-sv-jungle-deep/60 p-5 ring-1 ring-sv-lime/10">
+      <p class="font-heading text-sm font-bold text-sv-cream">Qué lleva esta sección</p>
+      <p class="mt-1 text-xs text-sv-cream/50">
+        En este mismo orden se ve en la página. Pulsa para ir al apartado.
+      </p>
+
+      <ol class="mt-4 space-y-1.5">
+        {
+          pasos.map((clave, i) => {
+            const { texto, lleno } = estado(clave);
+            return (
+              <li>
+                <a
+                  href={`#paso-${clave}`}
+                  class="flex items-center gap-3 rounded-lg px-2 py-1.5 transition hover:bg-sv-cream/5"
+                >
+                  <span class="w-5 shrink-0 text-right font-heading text-xs font-bold text-sv-lime">
+                    {i + 1}
+                  </span>
+                  <span class="min-w-0 flex-1 truncate text-sm text-sv-cream/85">
+                    {nombres[clave]}
+                  </span>
+                  <span
+                    class:list={[
+                      'shrink-0 truncate text-xs',
+                      lleno ? 'text-sv-cream/50' : 'text-sv-gold/80',
+                    ]}
+                    style="max-width:11rem"
+                  >
+                    {texto}
+                  </span>
+                </a>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </nav>
+
+    <form method="POST" action="/api/admin/guardar" class="space-y-5">
       <input type="hidden" name="accion" value="bloque" />
       <input type="hidden" name="id" value={block.id} />
       <input type="hidden" name="volver" value={HERE} />
 
-      <Card title="Visibilidad">
-        <label class="flex items-center gap-2.5 text-sm text-sv-cream/80">
-          <input type="checkbox" name="enabled" checked={block.enabled} class="h-4 w-4 accent-sv-lime" />
+      <label
+        class="flex items-center gap-3 rounded-2xl bg-sv-cream/5 px-5 py-4 ring-1 ring-sv-lime/15"
+      >
+        <input
+          type="checkbox"
+          name="enabled"
+          checked={block.enabled}
+          class="h-4 w-4 accent-sv-lime"
+        />
+        <span class="text-sm text-sv-cream/85">
           Mostrar esta sección en la página
-        </label>
-      </Card>
+          <span class="mt-0.5 block text-xs text-sv-cream/45">
+            Al desmarcarla desaparece de la web, pero no se borra nada.
+          </span>
+        </span>
+      </label>
 
       {
         block.type === 'marquee' ? (
           <>
-            <Card title="Nombre interno" description="Solo se ve aquí, para reconocer la franja.">
-              <Field label="Nombre" name="label" value={block.label} />
-            </Card>
-
-            <Card
-              title="Frases"
-              description="Se desplazan en bucle. Deja el texto vacío o marca eliminar para quitar una."
-            >
-              <div class="space-y-4">
-                {withBlank(block.items).map(({ item, i }) => (
-                  <div class={rowBox}>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                      <Select
-                        label="Ícono"
-                        name={`item.${i}.icon`}
-                        value={item?.icon ?? 'escudo'}
-                        options={iconOptions}
-                      />
-                      <Field
-                        label={item ? `Frase ${i + 1}` : 'Añadir frase'}
-                        name={`item.${i}.text`}
-                        value={item?.text ?? ''}
-                        placeholder="Documentación 100% en regla"
-                      />
-                    </div>
-                    <div class="mt-3 flex flex-wrap items-center gap-5">
-                      <label class="flex items-center gap-2 text-xs text-sv-cream/55">
-                        Orden
-                        <input type="number" name={`item.${i}.orden`} value={String(i)} class={orderInput} />
-                      </label>
-                      {item && (
-                        <label class={deleteLabel}>
-                          <input type="checkbox" name={`item.${i}.borrar`} class="h-4 w-4 accent-red-400" />
-                          Eliminar
-                        </label>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </>
-        ) : (
-          <>
-            <Card title="Textos">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label="Antetítulo"
-                  name="eyebrow"
-                  value={block.eyebrow ?? ''}
-                  placeholder="El proyecto"
-                  hint="El texto pequeño dorado sobre el título."
-                />
-                <Field label="Título" name="title" value={block.title} />
-                <Field
-                  label="Descripción"
-                  name="description"
-                  value={block.description ?? ''}
-                  type="textarea"
-                  wide
-                />
-              </div>
-            </Card>
-
-            {block.type === 'showcase' && (
-              <Card
-                title="Imagen de apertura"
-                description="Se muestra entera y a todo el ancho antes del video. Déjala vacía para no mostrarla."
+            <div id={`paso-${'nombre'}`}>
+              <Step
+                n={n('nombre')}
+                title="Nombre interno"
+                where="No se ve en la web"
+                description="Solo sirve para reconocer esta franja dentro del panel."
+                badge={estado('nombre').texto}
               >
-                <div class="flex flex-wrap gap-4">
-                  {block.banner?.src && (
-                    <img
-                      src={block.banner.src}
-                      alt=""
-                      class="h-28 w-20 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
-                    />
-                  )}
-                  <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
-                    <Field
-                      label="Ruta de la imagen"
-                      name="banner.src"
-                      value={block.banner?.src ?? ''}
-                      placeholder="https://.../media/principal.webp"
-                    />
-                    <Field
-                      label="Texto alternativo"
-                      name="banner.alt"
-                      value={block.banner?.alt ?? ''}
-                      placeholder="Qué dice y qué se ve en la imagen"
-                      hint="Importante si la imagen lleva texto: es lo único que leen los buscadores."
-                    />
-                  </div>
-                </div>
-              </Card>
-            )}
+                <Field label="Nombre" name="label" value={block.label} />
+              </Step>
+            </div>
 
-            {(block.type === 'video' || block.type === 'showcase') && (
-              <Card title="Video">
-                {block.type === 'showcase' && (
-                  <div class="mb-5">
-                    <Field
-                      label="Encabezado sobre el video"
-                      name="videoHeading"
-                      value={block.videoHeading ?? ''}
-                      placeholder="El proyecto en video"
-                      hint="Se muestra entre la imagen de apertura y el video. Déjalo vacío para no mostrarlo."
-                    />
-                  </div>
-                )}
-                <VideoFields prefix="video" source={block.source} poster={block.poster} posterName="poster" />
-              </Card>
-            )}
-
-            {block.type === 'showcase' && (
-              <Card
-                title="Encabezado del carrusel"
-                description="El título que separa el video de las fotos. Déjalo vacío para no mostrarlo."
-              >
-                <Field label="Encabezado" name="heading" value={block.heading ?? ''} placeholder="Así se ve el proyecto" />
-              </Card>
-            )}
-
-            {(block.type === 'carousel' || block.type === 'showcase') && (
-              <Card
-                title="Imágenes"
-                description="Se deslizan de lado. Deja la ruta vacía o marca eliminar para quitar una."
+            <div id="paso-frases">
+              <Step
+                n={n('frases')}
+                title="Frases que se desplazan"
+                where="La banda que cruza la pantalla de lado a lado"
+                description="Se repiten en bucle sin parar. Para quitar una, marca Eliminar o deja su texto vacío."
+                badge={estado('frases').texto}
               >
                 <div class="space-y-4">
-                  {withBlank(block.images).map(({ item, i }) => (
-                    <div class={rowBox}>
-                      <div class="flex flex-wrap gap-4">
-                        {item?.src && (
-                          <img
-                            src={item.src}
-                            alt=""
-                            class="h-20 w-28 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
-                          />
-                        )}
-                        <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
-                          <Field
-                            label={item ? `Imagen ${i + 1}` : 'Añadir imagen'}
-                            name={`img.${i}.src`}
-                            value={item?.src ?? ''}
-                            placeholder="/uploads/foto.jpg"
-                          />
-                          <Field
-                            label="Texto alternativo"
-                            name={`img.${i}.alt`}
-                            value={item?.alt ?? ''}
-                            placeholder="Vista aérea del terreno"
-                            hint="Lo que se lee si la foto no carga."
-                          />
-                          <Field
-                            label="Pie de foto"
-                            name={`img.${i}.caption`}
-                            value={item?.caption ?? ''}
-                            wide
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-3 flex flex-wrap items-center gap-5">
-                        <label class="flex items-center gap-2 text-xs text-sv-cream/55">
-                          Orden
-                          <input type="number" name={`img.${i}.orden`} value={String(i)} class={orderInput} />
-                        </label>
-                        {item && (
-                          <label class={deleteLabel}>
-                            <input type="checkbox" name={`img.${i}.borrar`} class="h-4 w-4 accent-red-400" />
-                            Eliminar
-                          </label>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-
-            {block.type === 'text' && (
-              <Card
-                title="Puntos"
-                description="Cada punto es una tarjeta con ícono. Deja el título vacío o marca eliminar para quitarlo."
-              >
-                <div class="space-y-4">
-                  {withBlank(block.bullets).map(({ item, i }) => (
+                  {withBlank(block.items).map(({ item, i }) => (
                     <div class={rowBox}>
                       <div class="flex flex-wrap gap-4">
                         <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
@@ -287,34 +284,35 @@ const orderInput =
                         <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
                           <Select
                             label="Ícono"
-                            name={`bullet.${i}.icon`}
+                            name={`item.${i}.icon`}
                             value={item?.icon ?? 'escudo'}
                             options={iconOptions}
                           />
                           <Field
-                            label={item ? `Punto ${i + 1}` : 'Añadir punto'}
-                            name={`bullet.${i}.title`}
-                            value={item?.title ?? ''}
-                            placeholder="Escritura pública"
-                          />
-                          <Field
-                            label="Texto"
-                            name={`bullet.${i}.text`}
+                            label={item ? `Frase ${i + 1}` : 'Añadir otra frase'}
+                            name={`item.${i}.text`}
                             value={item?.text ?? ''}
-                            type="textarea"
-                            rows={2}
-                            wide
+                            placeholder="Documentación en regla ante notaría"
                           />
                         </div>
                       </div>
                       <div class="mt-3 flex flex-wrap items-center gap-5">
                         <label class="flex items-center gap-2 text-xs text-sv-cream/55">
                           Orden
-                          <input type="number" name={`bullet.${i}.orden`} value={String(i)} class={orderInput} />
+                          <input
+                            type="number"
+                            name={`item.${i}.orden`}
+                            value={String(i)}
+                            class={orderInput}
+                          />
                         </label>
                         {item && (
                           <label class={deleteLabel}>
-                            <input type="checkbox" name={`bullet.${i}.borrar`} class="h-4 w-4 accent-red-400" />
+                            <input
+                              type="checkbox"
+                              name={`item.${i}.borrar`}
+                              class="h-4 w-4 accent-red-400"
+                            />
                             Eliminar
                           </label>
                         )}
@@ -322,88 +320,397 @@ const orderInput =
                     </div>
                   ))}
                 </div>
-              </Card>
+              </Step>
+            </div>
+          </>
+        ) : (
+          <>
+            <div id="paso-encabezado">
+              <Step
+                n={n('encabezado')}
+                title="Antetítulo, título y descripción"
+                where="Lo primero de la sección, centrado"
+                badge={estado('encabezado').texto}
+              >
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Antetítulo"
+                    name="eyebrow"
+                    value={block.eyebrow ?? ''}
+                    placeholder="El proyecto"
+                    hint="El texto pequeño en mayúsculas, sobre el título."
+                  />
+                  <Field
+                    label="Título"
+                    name="title"
+                    value={block.title}
+                    hint="Es el nombre con el que aparece esta sección en el panel."
+                  />
+                  <Field
+                    label="Descripción"
+                    name="description"
+                    value={block.description ?? ''}
+                    type="textarea"
+                    hint="El párrafo bajo el título. Puedes dejarlo vacío."
+                    wide
+                  />
+                </div>
+              </Step>
+            </div>
+
+            {block.type === 'showcase' && (
+              <div id="paso-apertura">
+                <Step
+                  n={n('apertura')}
+                  title="Imagen de apertura"
+                  where="A todo el ancho, justo antes del video"
+                  description="Pensada para una pieza ya diseñada, como un flyer: se muestra entera y sin recortar. Déjala vacía para no mostrarla."
+                  badge={estado('apertura').texto}
+                  optional
+                >
+                  <div class="flex flex-wrap gap-4">
+                    {block.banner?.src && (
+                      <img
+                        src={block.banner.src}
+                        alt=""
+                        class="h-32 w-24 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
+                      />
+                    )}
+                    <div class="grid min-w-0 flex-1 gap-4">
+                      <Field
+                        label="Ruta de la imagen"
+                        name="banner.src"
+                        value={block.banner?.src ?? ''}
+                        placeholder="https://.../media/principal.webp"
+                      />
+                      <Field
+                        label="Texto alternativo"
+                        name="banner.alt"
+                        value={block.banner?.alt ?? ''}
+                        placeholder="Qué dice y qué se ve en la imagen"
+                        hint="Si la imagen lleva texto, escríbelo aquí: es lo único que leen Google y los lectores de pantalla."
+                      />
+                    </div>
+                  </div>
+
+                  <MediaPicker />
+                </Step>
+              </div>
             )}
 
-            <Card title="Botón de WhatsApp" description="El botón que cierra la sección.">
-              <label class="mb-4 flex items-center gap-2.5 text-sm text-sv-cream/80">
-                <input
-                  type="checkbox"
-                  name="cta.enabled"
-                  checked={Boolean(block.cta)}
-                  class="h-4 w-4 accent-sv-lime"
-                />
-                Mostrar el botón
-              </label>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <Field label="Texto del botón" name="cta.label" value={block.cta?.label ?? ''} />
-                <Select
-                  label="Color"
-                  name="cta.style"
-                  value={block.cta?.style ?? 'whatsapp'}
-                  options={ctaStyles}
-                />
-                <Field
-                  label="Mensaje que se escribe solo"
-                  name="cta.message"
-                  value={block.cta?.message ?? ''}
-                  type="textarea"
-                  rows={2}
-                  wide
-                />
+            {block.type === 'showcase' && (
+              <div id="paso-tituloVideo">
+                <Step
+                  n={n('tituloVideo')}
+                  title="Encabezado sobre el video"
+                  where="Entre la imagen de apertura y el video"
+                  badge={estado('tituloVideo').texto}
+                  optional
+                >
+                  <Field
+                    label="Encabezado"
+                    name="videoHeading"
+                    value={block.videoHeading ?? ''}
+                    placeholder="Recorre el proyecto por dentro"
+                    hint="Déjalo vacío para no mostrarlo."
+                  />
+                </Step>
               </div>
-            </Card>
+            )}
+
+            {(block.type === 'video' || block.type === 'showcase') && (
+              <div id="paso-video">
+                <Step
+                  n={n('video')}
+                  title="Video"
+                  where="Centrado, con el botón de play encima"
+                  description="Hasta que alguien no pulsa play no se descarga nada, así que la página abre igual de rápido tenga video o no."
+                  badge={estado('video').texto}
+                >
+                  <VideoFields
+                    prefix="video"
+                    source={block.source}
+                    poster={block.poster}
+                    posterName="poster"
+                  />
+                  <MediaPicker />
+                </Step>
+              </div>
+            )}
+
+            {block.type === 'showcase' && (
+              <div id="paso-tituloFotos">
+                <Step
+                  n={n('tituloFotos')}
+                  title="Encabezado sobre las fotos"
+                  where="Entre el video y el carrusel"
+                  badge={estado('tituloFotos').texto}
+                  optional
+                >
+                  <Field
+                    label="Encabezado"
+                    name="heading"
+                    value={block.heading ?? ''}
+                    placeholder="Así se ve hoy el proyecto"
+                    hint="Déjalo vacío para no mostrarlo."
+                  />
+                </Step>
+              </div>
+            )}
+
+            {(block.type === 'carousel' || block.type === 'showcase') && (
+              <div id="paso-fotos">
+                <Step
+                  n={n('fotos')}
+                  title="Carrusel de fotos"
+                  where="Se deslizan de lado, con flechas y puntos debajo"
+                  description="Cada foto se puede ampliar a pantalla completa desde la web. Para quitar una, marca Eliminar o deja su ruta vacía."
+                  badge={estado('fotos').texto}
+                >
+                  <div class="space-y-4">
+                    {withBlank(block.images).map(({ item, i }) => (
+                      <div class={rowBox}>
+                        <div class="flex flex-wrap gap-4">
+                          {item?.src ? (
+                            <img
+                              src={item.src}
+                              alt=""
+                              class="h-24 w-32 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
+                            />
+                          ) : (
+                            <span class="grid h-24 w-32 shrink-0 place-items-center rounded-lg bg-sv-cream/5 text-xs text-sv-cream/35 ring-1 ring-dashed ring-sv-lime/20">
+                              Nueva
+                            </span>
+                          )}
+                          <div class="grid min-w-0 flex-1 gap-4">
+                            <Field
+                              label={item ? `Foto ${i + 1}` : 'Añadir otra foto'}
+                              name={`img.${i}.src`}
+                              value={item?.src ?? ''}
+                              placeholder="https://.../media/foto.jpg"
+                            />
+                            <Field
+                              label="Texto alternativo"
+                              name={`img.${i}.alt`}
+                              value={item?.alt ?? ''}
+                              placeholder="Vista aérea del terreno"
+                              hint="Describe lo que se ve. Se lee si la foto no carga."
+                            />
+                            <Field
+                              label="Pie de foto"
+                              name={`img.${i}.caption`}
+                              value={item?.caption ?? ''}
+                              placeholder="Cítricos en el terreno"
+                              hint="El texto que aparece debajo de la foto."
+                            />
+                          </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center gap-5">
+                          <label class="flex items-center gap-2 text-xs text-sv-cream/55">
+                            Orden
+                            <input
+                              type="number"
+                              name={`img.${i}.orden`}
+                              value={String(i)}
+                              class={orderInput}
+                            />
+                          </label>
+                          {item && (
+                            <label class={deleteLabel}>
+                              <input
+                                type="checkbox"
+                                name={`img.${i}.borrar`}
+                                class="h-4 w-4 accent-red-400"
+                              />
+                              Eliminar
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <MediaPicker />
+                </Step>
+              </div>
+            )}
+
+            {block.type === 'text' && (
+              <div id="paso-puntos">
+                <Step
+                  n={n('puntos')}
+                  title="Puntos con ícono"
+                  where="Tarjetas en dos columnas bajo la descripción"
+                  description="Para quitar uno, marca Eliminar o deja su título vacío."
+                  badge={estado('puntos').texto}
+                >
+                  <div class="space-y-4">
+                    {withBlank(block.bullets).map(({ item, i }) => (
+                      <div class={rowBox}>
+                        <div class="flex flex-wrap gap-4">
+                          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
+                            <Icon name={item?.icon ?? 'escudo'} class="h-6 w-6" />
+                          </span>
+                          <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
+                            <Select
+                              label="Ícono"
+                              name={`bullet.${i}.icon`}
+                              value={item?.icon ?? 'escudo'}
+                              options={iconOptions}
+                            />
+                            <Field
+                              label={item ? `Punto ${i + 1}` : 'Añadir otro punto'}
+                              name={`bullet.${i}.title`}
+                              value={item?.title ?? ''}
+                              placeholder="Escritura pública"
+                            />
+                            <Field
+                              label="Texto"
+                              name={`bullet.${i}.text`}
+                              value={item?.text ?? ''}
+                              type="textarea"
+                              rows={2}
+                              wide
+                            />
+                          </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center gap-5">
+                          <label class="flex items-center gap-2 text-xs text-sv-cream/55">
+                            Orden
+                            <input
+                              type="number"
+                              name={`bullet.${i}.orden`}
+                              value={String(i)}
+                              class={orderInput}
+                            />
+                          </label>
+                          {item && (
+                            <label class={deleteLabel}>
+                              <input
+                                type="checkbox"
+                                name={`bullet.${i}.borrar`}
+                                class="h-4 w-4 accent-red-400"
+                              />
+                              Eliminar
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Step>
+              </div>
+            )}
+
+            <div id="paso-boton">
+              <Step
+                n={n('boton')}
+                title="Botón de WhatsApp"
+                where="Cierra la sección, centrado"
+                description="Cada botón abre WhatsApp con un mensaje ya escrito. Poner uno distinto en cada sección es lo que permite saber desde dónde escribió cada persona."
+                badge={estado('boton').texto}
+                optional
+              >
+                <label class="mb-4 flex items-center gap-2.5 text-sm text-sv-cream/85">
+                  <input
+                    type="checkbox"
+                    name="cta.enabled"
+                    checked={Boolean(block.cta)}
+                    class="h-4 w-4 accent-sv-lime"
+                  />
+                  Mostrar el botón en esta sección
+                </label>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Texto del botón"
+                    name="cta.label"
+                    value={block.cta?.label ?? ''}
+                    placeholder="¡Agenda tu visita!"
+                  />
+                  <Select
+                    label="Color"
+                    name="cta.style"
+                    value={block.cta?.style ?? 'whatsapp'}
+                    options={ctaStyles}
+                  />
+                  <Field
+                    label="Mensaje que se escribe solo"
+                    name="cta.message"
+                    value={block.cta?.message ?? ''}
+                    type="textarea"
+                    rows={2}
+                    hint="Es lo que aparecerá ya escrito en el chat. Menciona la sección para reconocer de dónde vino el contacto."
+                    wide
+                  />
+                </div>
+              </Step>
+            </div>
           </>
         )
       }
 
-      <div class="flex justify-end">
-        <button
-          type="submit"
-          class="rounded-full bg-sv-lime px-7 py-3 font-heading text-sm font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110"
+      <div id="paso-fondo">
+        <Step
+          n={n('fondo')}
+          title="Fondo de la sección"
+          where="El color detrás de todo lo de arriba"
+          description="Los textos y los botones se ajustan solos al fondo que elijas, para que siempre se lean."
+          badge={estado('fondo').texto}
         >
-          Guardar cambios
-        </button>
+          <SurfacePicker
+            value={block.surface ?? 'auto'}
+            colors={content.theme.colors}
+            autoLabel={block.type === 'marquee' ? 'Verde medio' : 'Automático'}
+            autoHint={
+              block.type === 'marquee' ? 'El de siempre' : 'Alterna con la sección anterior'
+            }
+          />
+        </Step>
+      </div>
+
+      {/* Marca de fin de formulario. El servidor la exige para guardar: si no
+          llega, es que el navegador cortó el formulario y faltan campos. */}
+      <input type="hidden" name="formulario" value="completo" />
+
+      {/* La barra se queda pegada abajo: el formulario es largo y en el móvil
+          había que recorrerlo entero para llegar a guardar. */}
+      <div
+        class="sticky bottom-0 -mx-4 border-t border-sv-lime/15 bg-sv-jungle-deep/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-sv-cream/50">Nada cambia en la web hasta que guardes.</p>
+          <button
+            type="submit"
+            class="rounded-full bg-sv-lime px-7 py-3 font-heading text-sm font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110"
+          >
+            Guardar cambios
+          </button>
+        </div>
       </div>
     </form>
 
-    {
-      (block.type === 'carousel' || block.type === 'video' || block.type === 'showcase') && (
-        <Card
-          title="Imágenes"
-          description="Sube una foto nueva, o copia la ruta de una que ya esté subida."
-        >
-          <Uploader volver={HERE} />
-          <MediaLibrary />
-        </Card>
-      )
-    }
-
-    <Card title="Eliminar sección">
-      <details>
-        <summary
-          class="w-fit cursor-pointer list-none rounded-full border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
-        >
-          Eliminar esta sección
-        </summary>
-        <div class="mt-4 rounded-xl bg-red-500/5 p-4 ring-1 ring-red-500/20">
-          <p class="text-sm text-sv-cream/75">
-            Se borra con todo su contenido y no se puede deshacer. Si solo quieres que
-            deje de verse, desmarca la casilla de visibilidad y guarda.
-          </p>
-          <form method="POST" action="/api/admin/guardar" class="mt-4">
-            <input type="hidden" name="accion" value="eliminar" />
-            <input type="hidden" name="id" value={block.id} />
-            <input type="hidden" name="volver" value={HERE} />
-            <button
-              type="submit"
-              class="rounded-full bg-red-500/80 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
-            >
-              Sí, eliminar
-            </button>
-          </form>
-        </div>
-      </details>
-    </Card>
+    <details class="rounded-2xl bg-sv-cream/5 p-5 ring-1 ring-sv-lime/15 sm:p-6">
+      <summary class="cursor-pointer list-none text-sm font-semibold text-red-300">
+        Eliminar esta sección
+      </summary>
+      <div class="mt-4 rounded-xl bg-red-500/5 p-4 ring-1 ring-red-500/20">
+        <p class="text-sm text-sv-cream/75">
+          Se borra con todo su contenido y no se puede deshacer. Si solo quieres que
+          deje de verse, desmarca <strong>Mostrar esta sección</strong> y guarda.
+        </p>
+        <form method="POST" action="/api/admin/guardar" class="mt-4">
+          <input type="hidden" name="accion" value="eliminar" />
+          <input type="hidden" name="id" value={block.id} />
+          <input type="hidden" name="volver" value={HERE} />
+          <button
+            type="submit"
+            class="rounded-full bg-red-500/80 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+          >
+            Sí, eliminar
+          </button>
+        </form>
+      </div>
+    </details>
   </div>
 </AdminLayout>

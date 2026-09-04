@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import Icon from '../../components/Icon.astro';
+import LoginBackdrop from '../../components/admin/LoginBackdrop.astro';
 import { SESSION_COOKIE, adminConfig, readSession } from '../../lib/auth';
 
 export const prerender = false;
@@ -15,83 +15,148 @@ const messages: Record<string, string> = {
   credenciales: 'Usuario o contraseña incorrectos.',
   bloqueado: 'Demasiados intentos fallidos. Espera unos minutos y vuelve a probar.',
   salida: 'Cerraste sesión correctamente.',
+  incompleto: 'La sesión caducó mientras editabas. Vuelve a entrar.',
 };
 
 const code = Astro.url.searchParams.get('e') ?? '';
 const message = messages[code];
 const isError = Boolean(message) && code !== 'salida';
+
+const campo =
+  'w-full rounded-xl bg-sv-jungle-deep/70 py-3 pr-4 pl-11 text-sv-cream ring-1 ring-sv-lime/20 outline-none transition placeholder:text-sv-cream/25 focus:bg-sv-jungle-deep focus:ring-2 focus:ring-sv-lime';
+const iconoCampo = 'pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-sv-lime/50';
 ---
 
 <AdminLayout title="Acceso al panel">
-  <main class="grid min-h-dvh place-items-center px-4 py-12">
-    <div class="w-full max-w-sm">
-      <div class="text-center">
-        <span
-          class="inline-grid h-14 w-14 place-items-center rounded-2xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25"
-        >
-          <Icon name="llave" class="h-7 w-7" />
-        </span>
-        <h1 class="mt-5 font-heading text-2xl text-sv-cream">Panel de administración</h1>
-        <p class="mt-2 text-sm text-sv-cream/60">Selvania Park</p>
+  <main class="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-12">
+    <LoginBackdrop />
+
+    <div class="relative w-full max-w-sm">
+      {/* La tarjeta se despega del fondo con un velo difuminado: así la
+          vegetación se intuye detrás sin restar legibilidad al formulario. */}
+      <div
+        class="rounded-3xl bg-sv-cream/[0.06] p-7 shadow-2xl shadow-black/50 ring-1 ring-sv-lime/20 backdrop-blur-md sm:p-8"
+      >
+        <div class="flex flex-col items-center text-center">
+          <span
+            class="grid h-14 w-14 place-items-center rounded-2xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25"
+          >
+            <svg
+              viewBox="0 0 100 140"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-8 w-8"
+              aria-hidden="true"
+            >
+              <path d="M50 4C22 34 12 84 50 136 88 84 78 34 50 4Z"></path>
+              <path d="M50 16V128"></path>
+              <path d="M50 46 28 36M50 46l22-10M50 80 26 69M50 80l24-11"></path>
+            </svg>
+          </span>
+
+          <h1 class="mt-5 font-heading text-xl font-bold text-sv-cream">
+            Panel de administración
+          </h1>
+          <p class="mt-1 text-sm text-sv-cream/50">Selvania Park</p>
+        </div>
+
+        {
+          message && (
+            <p
+              role={isError ? 'alert' : 'status'}
+              class:list={[
+                'mt-6 rounded-xl px-4 py-3 text-sm',
+                isError
+                  ? 'bg-red-500/10 text-red-300 ring-1 ring-red-500/30'
+                  : 'bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/30',
+              ]}
+            >
+              {message}
+            </p>
+          )
+        }
+
+        <form method="POST" action="/api/login" class="mt-7 space-y-4">
+          <div>
+            <label
+              for="usuario"
+              class="mb-1.5 block text-xs font-semibold tracking-wide text-sv-cream/70 uppercase"
+            >
+              Usuario
+            </label>
+            <div class="relative">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class={iconoCampo}
+                aria-hidden="true"
+              >
+                <path d="M20 21v-2a5 5 0 0 0-5-5H9a5 5 0 0 0-5 5v2"></path>
+                <path d="M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0"></path>
+              </svg>
+              <input
+                id="usuario"
+                name="usuario"
+                type="text"
+                required
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                class={campo}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="password"
+              class="mb-1.5 block text-xs font-semibold tracking-wide text-sv-cream/70 uppercase"
+            >
+              Contraseña
+            </label>
+            <div class="relative">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class={iconoCampo}
+                aria-hidden="true"
+              >
+                <path d="M6 10h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z"></path>
+                <path d="M8.5 10V7a3.5 3.5 0 1 1 7 0v3"></path>
+              </svg>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autocomplete="current-password"
+                class={campo}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="mt-2 min-h-13 w-full rounded-full bg-sv-lime font-heading text-base font-bold tracking-wide text-sv-jungle-deep uppercase shadow-lg shadow-black/30 transition hover:brightness-110 active:scale-[0.98]"
+          >
+            Entrar
+          </button>
+        </form>
       </div>
 
-      {
-        message && (
-          <p
-            role="status"
-            class:list={[
-              'mt-6 rounded-xl px-4 py-3 text-sm',
-              isError
-                ? 'bg-red-500/10 text-red-300 ring-1 ring-red-500/30'
-                : 'bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/30',
-            ]}
-          >
-            {message}
-          </p>
-        )
-      }
-
-      <form method="POST" action="/api/login" class="mt-6 space-y-4">
-        <div>
-          <label for="usuario" class="block text-sm font-semibold text-sv-cream/80">
-            Usuario
-          </label>
-          <input
-            id="usuario"
-            name="usuario"
-            type="text"
-            required
-            autocomplete="username"
-            autocapitalize="none"
-            spellcheck="false"
-            class="mt-2 w-full rounded-xl bg-sv-cream/5 px-4 py-3 text-sv-cream ring-1 ring-sv-lime/20 outline-none placeholder:text-sv-cream/30 focus:ring-2 focus:ring-sv-lime"
-          />
-        </div>
-
-        <div>
-          <label for="password" class="block text-sm font-semibold text-sv-cream/80">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autocomplete="current-password"
-            class="mt-2 w-full rounded-xl bg-sv-cream/5 px-4 py-3 text-sv-cream ring-1 ring-sv-lime/20 outline-none placeholder:text-sv-cream/30 focus:ring-2 focus:ring-sv-lime"
-          />
-        </div>
-
-        <button
-          type="submit"
-          class="min-h-13 w-full rounded-full bg-sv-lime font-heading text-base font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110 active:scale-[0.98]"
-        >
-          Entrar
-        </button>
-      </form>
-
-      <p class="mt-8 text-center text-xs text-sv-cream/40">
-        <a href="/" class="underline-offset-4 hover:text-sv-lime hover:underline">
+      <p class="mt-6 text-center text-xs text-sv-cream/40">
+        <a href="/" class="underline-offset-4 transition hover:text-sv-lime hover:underline">
           Volver a la página principal
         </a>
       </p>

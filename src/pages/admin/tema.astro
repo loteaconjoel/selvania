@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import Nav from '../../components/admin/Nav.astro';
 import Notice from '../../components/admin/Notice.astro';
-import Card from '../../components/admin/Card.astro';
+import Step from '../../components/admin/Step.astro';
 import Field from '../../components/admin/Field.astro';
 import { readContent } from '../../lib/content-store';
 
@@ -20,82 +20,158 @@ const HERE = '/admin/tema';
   <div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
     <Notice />
 
-    <form method="POST" action="/api/admin/guardar" class="space-y-6">
+    <header class="flex flex-wrap items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="font-heading text-2xl text-sv-cream">Tema</h1>
+        <p class="mt-1.5 max-w-2xl text-sm text-sv-cream/60">
+          Los cinco colores y las dos letras que usa <strong>toda</strong> la página.
+          Cambiar uno aquí lo cambia en todas las secciones a la vez.
+        </p>
+      </div>
+
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener"
+        class="shrink-0 rounded-full border border-sv-lime/35 px-4 py-2 text-xs font-semibold text-sv-lime transition hover:bg-sv-lime hover:text-sv-jungle-deep"
+      >
+        Ver en la web
+      </a>
+    </header>
+
+    <p class="rounded-2xl bg-sv-gold/10 px-5 py-4 text-sm text-sv-cream/80 ring-1 ring-sv-gold/25">
+      <strong class="text-sv-gold">Esto es lo global.</strong> Cada sección puede además
+      elegir cuál de los dos verdes usa como fondo, en su propia pantalla de edición,
+      en el apartado <em>Fondo de la sección</em>.{" "}
+      <a href="/admin" class="text-sv-lime underline-offset-4 hover:underline">Ir a las secciones</a>.
+    </p>
+
+    <form method="POST" action="/api/admin/guardar" class="space-y-5">
       <input type="hidden" name="accion" value="tema" />
       <input type="hidden" name="volver" value={HERE} />
 
-      <Card
+      <Step
+        n={1}
         title="Colores"
-        description="Se aplican a toda la página de golpe. Los íconos y los bordes también los siguen."
+        where="Fondos, textos, íconos y botones de toda la página"
+        description="Puedes elegirlos con la rueda o pegar el código hexadecimal de la marca."
       >
         <div class="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Verde bosque oscuro"
+            label="Verde profundo"
             name="color.jungleDeep"
             value={colors.jungleDeep}
             type="color"
-            hint="Fondo principal."
+            hint="Fondo principal y color del texto sobre fondos claros."
           />
           <Field
             label="Verde medio"
             name="color.jungle"
             value={colors.jungle}
             type="color"
-            hint="Acentos, íconos y fondo de secciones alternas."
+            hint="Fondo de las secciones alternas y de la franja."
           />
           <Field
-            label="Verde lima neón"
+            label="Verde lima"
             name="color.lime"
             value={colors.lime}
             type="color"
-            hint="Puntos de acción: CTA, botones y resaltados."
+            hint="Botones, íconos y todo lo que debe llamar la atención."
           />
           <Field
             label="Verde claro"
             name="color.gold"
             value={colors.gold}
             type="color"
-            hint="Bloques de contenido y acento secundario."
+            hint="Antetítulos y acentos secundarios."
           />
           <Field
             label="Blanco suave"
             name="color.cream"
             value={colors.cream}
             type="color"
-            hint="Texto sobre fondos oscuros."
+            hint="Texto sobre los fondos oscuros."
+            wide
           />
         </div>
 
-        <div class="mt-6 rounded-xl p-5 ring-1 ring-sv-lime/15" style={`background-color:${colors.jungle}`}>
-          <p
-            class="font-heading text-xs font-bold tracking-[0.2em] uppercase"
-            style={`color:${colors.gold}`}
-          >
-            Vista previa
+        {/* Los dos fondos, uno al lado del otro: es la comparación que de verdad
+            importa, porque cada sección usa uno u otro. */}
+        <div class="mt-6">
+          <p class="mb-3 text-xs font-semibold tracking-wide text-sv-cream/70 uppercase">
+            Cómo queda
           </p>
-          <p class="mt-2 font-heading text-2xl font-extrabold" style={`color:${colors.cream}`}>
-            Así se ve <span style={`color:${colors.lime}`}>el acento</span>
-          </p>
-          <span
-            class="mt-4 inline-block rounded-full px-5 py-2.5 text-sm font-bold uppercase"
-            style={`background-color:${colors.lime};color:${colors.jungleDeep}`}
-          >
-            Un botón
-          </span>
-        </div>
-      </Card>
 
-      <Card
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div
+              class="rounded-xl p-5 ring-1 ring-sv-cream/10"
+              style={`background-color:${colors.jungleDeep}`}
+            >
+              <p
+                class="font-heading text-xs font-bold tracking-[0.2em] uppercase"
+                style={`color:${colors.gold}`}
+              >
+                Sección oscura
+              </p>
+              <p class="mt-2 font-heading text-xl font-bold" style={`color:${colors.cream}`}>
+                Un título de ejemplo
+              </p>
+              <p class="mt-1.5 text-sm" style={`color:${colors.cream}CC`}>
+                Y el párrafo que lo acompaña.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full px-5 py-2 text-sm font-bold uppercase"
+                style={`background-color:${colors.lime};color:${colors.jungleDeep}`}
+              >
+                Un botón
+              </span>
+            </div>
+
+            <div
+              class="rounded-xl p-5 ring-1 ring-sv-cream/10"
+              style={`background-color:${colors.jungle}`}
+            >
+              <p
+                class="font-heading text-xs font-bold tracking-[0.2em] uppercase"
+                style={`color:${colors.jungleDeep}`}
+              >
+                Sección clara
+              </p>
+              <p class="mt-2 font-heading text-xl font-bold" style={`color:${colors.jungleDeep}`}>
+                Un título de ejemplo
+              </p>
+              <p class="mt-1.5 text-sm" style={`color:${colors.jungleDeep}E6`}>
+                Y el párrafo que lo acompaña.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full px-5 py-2 text-sm font-bold uppercase"
+                style={`background-color:${colors.jungleDeep};color:${colors.cream}`}
+              >
+                Un botón
+              </span>
+            </div>
+          </div>
+
+          <p class="mt-3 text-xs text-sv-cream/45">
+            Sobre el fondo claro los botones se invierten solos. Es lo que mantiene el
+            texto legible sin que haya que pensarlo.
+          </p>
+        </div>
+      </Step>
+
+      <Step
+        n={2}
         title="Tipografías"
-        description="Cualquier familia de Google Fonts, escrita igual que allí. Si el nombre no existe, se usa la tipografía del sistema."
+        where="Una para los títulos y otra para el texto corrido"
+        description="Cualquier familia de Google Fonts, escrita igual que allí. Si el nombre no existe, se usa la letra del sistema."
       >
         <div class="grid gap-4 sm:grid-cols-2">
           <Field
             label="Títulos"
             name="font.heading"
             value={fonts.heading}
-            placeholder="Outfit"
-            hint="Ej: Outfit, Poppins, Bricolage Grotesque"
+            placeholder="Space Grotesk"
+            hint="Ej: Space Grotesk, Outfit, Poppins"
           />
           <Field
             label="Texto"
@@ -105,15 +181,29 @@ const HERE = '/admin/tema';
             hint="Ej: Inter, Source Sans 3, Work Sans"
           />
         </div>
-      </Card>
 
-      <div class="flex justify-end">
-        <button
-          type="submit"
-          class="rounded-full bg-sv-lime px-7 py-3 font-heading text-sm font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110"
-        >
-          Guardar cambios
-        </button>
+        <div class="mt-5 rounded-xl bg-sv-jungle-deep/60 p-5 ring-1 ring-sv-lime/10">
+          <p class="font-heading text-2xl font-bold text-sv-cream">
+            Así se ven los títulos
+          </p>
+          <p class="mt-2 text-sm text-sv-cream/70">
+            Y así el texto corrido que va debajo, que es el que se lee de verdad.
+          </p>
+        </div>
+      </Step>
+
+      <div
+        class="sticky bottom-0 -mx-4 border-t border-sv-lime/15 bg-sv-jungle-deep/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-sv-cream/50">Nada cambia en la web hasta que guardes.</p>
+          <button
+            type="submit"
+            class="rounded-full bg-sv-lime px-7 py-3 font-heading text-sm font-bold tracking-wide text-sv-jungle-deep uppercase transition hover:brightness-110"
+          >
+            Guardar cambios
+          </button>
+        </div>
       </div>
     </form>
   </div>
