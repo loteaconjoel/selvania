@@ -180,7 +180,7 @@ export async function listMedia(): Promise<MediaFile[]> {
     }
 
     return data
-      .filter((file) => file.id && /.(jpe?g|png|webp|avif|gif)$/i.test(file.name))
+      .filter((file) => file.id && /\.(jpe?g|png|webp|avif|gif)$/i.test(file.name))
       .map((file) => ({
         name: file.name,
         url: supabase.storage.from(BUCKET).getPublicUrl(file.name).data.publicUrl,
@@ -190,7 +190,7 @@ export async function listMedia(): Promise<MediaFile[]> {
   try {
     const files = await readdir(UPLOADS_DIR);
     return files
-      .filter((name) => /.(jpe?g|png|webp|avif|gif)$/i.test(name))
+      .filter((name) => /\.(jpe?g|png|webp|avif|gif)$/i.test(name))
       .map((name) => ({ name, url: `${UPLOADS_URL}/${name}` }));
   } catch {
     return [];
