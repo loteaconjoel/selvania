@@ -75,6 +75,8 @@ export interface ShowcaseBlock extends BlockBase {
    * sin recortar, porque recortarla le comería el texto.
    */
   banner?: Media;
+  /** Encabezado entre la imagen de apertura y el video. */
+  videoHeading?: string;
   source: VideoSource;
   poster?: string;
   /** Encabezado que separa el video del carrusel. */

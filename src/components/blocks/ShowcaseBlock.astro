@@ -63,7 +63,22 @@ const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream
     )
   }
 
-  <div class="relative mt-10 px-4 sm:px-6">
+  {
+    block.videoHeading && (
+      <div class="relative mt-12 px-4 sm:px-6">
+        <h3
+          class:list={[
+            'mx-auto max-w-3xl text-center font-heading text-2xl font-bold sm:text-3xl',
+            headingTone,
+          ]}
+        >
+          {block.videoHeading}
+        </h3>
+      </div>
+    )
+  }
+
+  <div class:list={['relative px-4 sm:px-6', block.videoHeading ? 'mt-8' : 'mt-10']}>
     <div class="mx-auto max-w-3xl">
       <VideoPlayer
         source={block.source}

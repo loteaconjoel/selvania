@@ -105,6 +105,7 @@ export const defaultContent: SiteContent = {
         src: `${FOTO}/principal.webp`,
         alt: 'Urbanización Los Cocos: lotes de 190 m² en el distrito de Sangani, a 6 min del parque de Pichanaki. Compra y venta notarial, con luz y agua. Precio S/ 40,000 con facilidades.',
       },
+      videoHeading: 'El proyecto en video',
       source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
       heading: 'Así se ve hoy el proyecto',
       images: [
@@ -138,14 +139,24 @@ export const defaultContent: SiteContent = {
       title: '¿Por qué un puente propio cambia todo?',
       description:
         'Un acceso directo y transitable todo el año es lo que separa un terreno al que se llega, de uno al que solo se intenta llegar. El puente garantiza entrada en cualquier temporada, revaloriza cada lote y permite el ingreso de maquinaria y materiales para construir.',
-      // Todavía no hay foto del puente. Se muestra el trabajo de acceso, que es
-      // lo único real que tenemos de esta sección, en vez de rellenar con fotos
-      // que no enseñan lo que el texto promete.
+      // Todavía no hay fotos del puente. Se reutilizan las del proyecto para que
+      // el carrusel no quede con una sola imagen, y los pies describen lo que se
+      // ve de verdad: ninguno afirma que eso sea el puente.
       images: [
         {
           src: `${FOTO}/movimiento-tierras.jpg`,
           alt: 'Retroexcavadora trabajando junto a un montón de piedras de río',
           caption: 'Movimiento de tierras para el acceso',
+        },
+        {
+          src: `${FOTO}/naranjos.jpg`,
+          alt: 'Árboles de cítricos cargados de fruta sobre terreno despejado',
+          caption: 'Terreno despejado del proyecto',
+        },
+        {
+          src: `${FOTO}/huerto.jpg`,
+          alt: 'Huerto de naranjos con cerros y palmeras al fondo',
+          caption: 'El proyecto entre los cítricos',
         },
       ],
       cta: {

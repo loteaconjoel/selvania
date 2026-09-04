@@ -6,6 +6,7 @@ import Card from '../../components/admin/Card.astro';
 import Field from '../../components/admin/Field.astro';
 import Select from '../../components/admin/Select.astro';
 import Uploader from '../../components/admin/Uploader.astro';
+import MediaLibrary from '../../components/admin/MediaLibrary.astro';
 import VideoFields from '../../components/admin/VideoFields.astro';
 import { readContent } from '../../lib/content-store';
 
@@ -211,8 +212,12 @@ const deleteLabel = 'flex items-center gap-2 text-xs font-semibold text-red-300'
       </div>
     </form>
 
-    <Card title="Imágenes" description="Sube aquí las fotos y luego pega su ruta donde la necesites.">
+    <Card
+      title="Imágenes"
+      description="Sube una foto nueva, o copia la ruta de una que ya esté subida."
+    >
       <Uploader volver={HERE} />
+      <MediaLibrary />
     </Card>
   </div>
 </AdminLayout>

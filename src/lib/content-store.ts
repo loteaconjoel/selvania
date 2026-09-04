@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -154,4 +154,45 @@ export async function saveMedia(file: File): Promise<string> {
   await writeFile(join(UPLOADS_DIR, name), Buffer.from(await file.arrayBuffer()));
 
   return `${UPLOADS_URL}/${name}`;
+}
+
+export interface MediaFile {
+  name: string;
+  url: string;
+}
+
+/**
+ * Imágenes ya subidas, para que el panel pueda ofrecerlas en vez de obligar a
+ * recordar rutas. Si falla la consulta se devuelve una lista vacía: la galería
+ * es una comodidad y no debe tumbar la pantalla de edición.
+ */
+export async function listMedia(): Promise<MediaFile[]> {
+  const supabase = getClient();
+
+  if (supabase) {
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error || !data) {
+      console.error('[content-store] No se pudo listar el almacenamiento:', error?.message);
+      return [];
+    }
+
+    return data
+      .filter((file) => file.id && /.(jpe?g|png|webp|avif|gif)$/i.test(file.name))
+      .map((file) => ({
+        name: file.name,
+        url: supabase.storage.from(BUCKET).getPublicUrl(file.name).data.publicUrl,
+      }));
+  }
+
+  try {
+    const files = await readdir(UPLOADS_DIR);
+    return files
+      .filter((name) => /.(jpe?g|png|webp|avif|gif)$/i.test(name))
+      .map((name) => ({ name, url: `${UPLOADS_URL}/${name}` }));
+  } catch {
+    return [];
+  }
 }

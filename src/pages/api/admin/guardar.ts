@@ -195,6 +195,7 @@ export const POST: APIRoute = async ({ request }) => {
         } else if (block.type === 'showcase') {
           block.source = f.videoSource(form, 'video', block.source);
           block.poster = f.mediaUrl(f.text(form, 'poster')) || undefined;
+          block.videoHeading = f.text(form, 'videoHeading') || undefined;
           block.heading = f.text(form, 'heading') || undefined;
           block.images = readImages(form);
 
