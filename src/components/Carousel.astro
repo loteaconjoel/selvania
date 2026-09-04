@@ -1,4 +1,5 @@
 ---
+import CarouselShell from './CarouselShell.astro';
 import type { Media } from '../data/types';
 import type { Surface } from '../lib/surface';
 
@@ -12,271 +13,74 @@ const { images, label, surface = 'dark' } = Astro.props;
 
 const tone = {
   dark: {
-    // Sombra corta y muy difuminada hacia abajo. La anterior era `shadow-2xl`
-    // teñido, que sobre un fondo plano deja un manchón oscuro alrededor de la
-    // foto en vez de leerse como profundidad.
+    // Sombra corta y muy difuminada hacia abajo. Una sombra grande y teñida
+    // sobre un fondo plano deja un manchón alrededor de la foto en vez de
+    // leerse como profundidad.
     frame: 'ring-1 ring-sv-lime/25 shadow-lg shadow-black/40',
     caption: 'text-sv-cream/70',
-    control: 'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
-    dotOn: 'bg-sv-lime',
-    dotOff: 'bg-sv-cream/30',
   },
   light: {
     frame: 'ring-1 ring-sv-jungle-deep/20 shadow-lg shadow-sv-jungle-deep/20',
     caption: 'text-sv-jungle-deep',
-    control:
-      'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/30 hover:brightness-125',
-    dotOn: 'bg-sv-jungle-deep',
-    dotOff: 'bg-sv-jungle-deep/30',
   },
 }[surface];
 ---
 
-<div
-  class="relative"
-  data-carousel
-  role="group"
-  aria-roledescription="carrusel"
-  aria-label={label}
->
-  <div class="overflow-hidden" data-embla-viewport>
-    <div class="-ml-3 flex touch-pan-y sm:-ml-5">
-      {
-        images.map((img) => (
-          <figure class="min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-[56%] sm:pl-5 lg:basis-[42%]">
-            {/* El escalado va en este envoltorio y no en el <figure>: si se
-                aplica al figure, su relleno se encoge con él y la foto vecina
-                se desplaza encima de la activa. */}
-            <div data-slide class="transition-[transform,filter] duration-500">
-              <div
-                class:list={[
-                  'relative aspect-4/3 overflow-hidden rounded-3xl bg-sv-jungle-deep',
-                  tone.frame,
-                ]}
+<CarouselShell label={label} surface={surface} lightbox>
+  {
+    images.map((img) => (
+      <figure class="min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-[56%] sm:pl-5 lg:basis-[42%]">
+        {/* El escalado va en este envoltorio y no en el <figure>: si se aplica
+            al figure, su relleno se encoge con él y la foto vecina se desplaza
+            encima de la activa. */}
+        <div data-slide class="transition-[transform,filter] duration-500">
+          <div
+            class:list={[
+              'relative aspect-4/3 overflow-hidden rounded-3xl bg-sv-jungle-deep',
+              tone.frame,
+            ]}
+          >
+            <img
+              src={img.src}
+              alt={img.alt}
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+
+            <button
+              type="button"
+              data-zoom
+              data-src={img.src}
+              data-alt={img.alt}
+              data-caption={img.caption ?? ''}
+              aria-label={`Ampliar imagen: ${img.alt}`}
+              class="absolute top-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-sv-jungle-deep/70 text-sv-cream ring-1 ring-sv-cream/20 backdrop-blur-sm transition duration-200 hover:scale-105 hover:bg-sv-jungle-deep active:scale-95"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-5 w-5"
               >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  loading="lazy"
-                  decoding="async"
-                  class="h-full w-full object-cover"
-                />
+                <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+                <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+                <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+              </svg>
+            </button>
+          </div>
 
-                <button
-                  type="button"
-                  data-zoom
-                  data-src={img.src}
-                  data-alt={img.alt}
-                  data-caption={img.caption ?? ''}
-                  aria-label={`Ampliar imagen: ${img.alt}`}
-                  class="absolute top-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-sv-jungle-deep/70 text-sv-cream ring-1 ring-sv-cream/20 backdrop-blur-sm transition duration-200 hover:bg-sv-jungle-deep hover:scale-105 active:scale-95"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="h-5 w-5"
-                  >
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-                    <path d="M16 3h3a2 2 0 0 1 2 2v3" />
-                    <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
-                    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-                  </svg>
-                </button>
-              </div>
-
-              {img.caption && (
-                <figcaption class:list={['mt-4 text-center text-sm font-medium', tone.caption]}>
-                  {img.caption}
-                </figcaption>
-              )}
-            </div>
-          </figure>
-        ))
-      }
-    </div>
-  </div>
-
-  <div class="mt-7 flex items-center justify-center gap-4">
-    <button
-      type="button"
-      data-embla-prev
-      aria-label="Imagen anterior"
-      class:list={[
-        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
-        tone.control,
-      ]}
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
-        <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-    </button>
-
-    <div
-      class="flex items-center gap-2"
-      data-embla-dots
-      data-dot-on={tone.dotOn}
-      data-dot-off={tone.dotOff}
-    >
-    </div>
-
-    <button
-      type="button"
-      data-embla-next
-      aria-label="Imagen siguiente"
-      class:list={[
-        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
-        tone.control,
-      ]}
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
-        <path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-    </button>
-  </div>
-
-  {/* Se usa <dialog> nativo: trae gratis el cierre con Escape, el foco atrapado
-      dentro y el fondo oscurecido, sin librerías. */}
-  <dialog
-    data-lightbox
-    class="m-auto max-h-[92dvh] max-w-[95vw] rounded-3xl bg-transparent p-0 backdrop:bg-black/85"
-  >
-    {/* Columna con separación explícita: el pie va en su propia píldora para
-        que nunca se confunda con la parte baja de la foto. */}
-    <figure class="relative m-0 flex flex-col items-center gap-4">
-      {/* Sin atributo src hasta que se abre: un src="" hace que el navegador
-          pida la propia página como si fuera una imagen. */}
-      <img
-        data-lightbox-img
-        alt=""
-        class="max-h-[76dvh] max-w-[95vw] rounded-3xl object-contain"
-      />
-      <figcaption
-        data-lightbox-caption
-        class="rounded-full bg-sv-jungle-deep/90 px-5 py-2 text-center text-sm font-medium text-sv-cream ring-1 ring-sv-cream/15"
-      >
-      </figcaption>
-      <button
-        type="button"
-        data-lightbox-close
-        aria-label="Cerrar"
-        class="absolute top-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-sv-jungle-deep/80 text-sv-cream ring-1 ring-sv-cream/25 backdrop-blur-sm transition hover:bg-sv-jungle-deep"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
-          <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"></path>
-        </svg>
-      </button>
-    </figure>
-  </dialog>
-</div>
-
-<script>
-  import EmblaCarousel from 'embla-carousel';
-
-  // Clases usadas al vuelo por el script. Se dejan escritas aquí para que el
-  // generador de CSS las encuentre al analizar el archivo.
-  const DOT_BASE = 'h-2.5 rounded-full transition-all duration-300';
-  // Se atenúa con brillo y escala, nunca con opacidad: sobre el fondo verde
-  // claro la opacidad mezcla la foto con el verde y parece un fallo de carga.
-  const SLIDE_ON = ['scale-100', 'brightness-100'];
-  const SLIDE_OFF = ['scale-95', 'brightness-[0.55]'];
-
-  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
-    const viewport = root.querySelector<HTMLElement>('[data-embla-viewport]');
-    if (!viewport) return;
-
-    const embla = EmblaCarousel(viewport, {
-      loop: true,
-      // Alineado al inicio para que la primera foto arranque justo en el mismo
-      // margen que el título y el texto de la sección.
-      align: 'start',
-      skipSnaps: false,
-    });
-
-    root
-      .querySelector<HTMLButtonElement>('[data-embla-prev]')
-      ?.addEventListener('click', () => embla.scrollPrev());
-    root
-      .querySelector<HTMLButtonElement>('[data-embla-next]')
-      ?.addEventListener('click', () => embla.scrollNext());
-
-    const dotsNode = root.querySelector<HTMLElement>('[data-embla-dots]');
-    const onClass = dotsNode?.dataset.dotOn ?? 'bg-sv-lime';
-    const offClass = dotsNode?.dataset.dotOff ?? 'bg-sv-cream/30';
-    const dots: HTMLButtonElement[] = [];
-
-    if (dotsNode) {
-      embla.scrollSnapList().forEach((_, i) => {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = DOT_BASE;
-        dot.setAttribute('aria-label', `Ir a la imagen ${i + 1}`);
-        dot.addEventListener('click', () => embla.scrollTo(i));
-        dotsNode.appendChild(dot);
-        dots.push(dot);
-      });
-    }
-
-    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
-
-    const sync = () => {
-      const selected = embla.selectedScrollSnap();
-
-      dots.forEach((dot, i) => {
-        const active = i === selected;
-        dot.classList.toggle(onClass, active);
-        dot.classList.toggle(offClass, !active);
-        dot.classList.toggle('w-7', active);
-        dot.classList.toggle('w-2.5', !active);
-      });
-
-      // Las imágenes que no están centradas se atenúan: guía la mirada a la
-      // que toca y deja claro que hay más a los lados.
-      slides.forEach((slide, i) => {
-        const active = i === selected;
-        slide.classList.add(...(active ? SLIDE_ON : SLIDE_OFF));
-        slide.classList.remove(...(active ? SLIDE_OFF : SLIDE_ON));
-      });
-    };
-
-    embla.on('select', sync);
-    sync();
-
-    // --- Ampliar imagen ---
-    const dialog = root.querySelector<HTMLDialogElement>('[data-lightbox]');
-    const big = dialog?.querySelector<HTMLImageElement>('[data-lightbox-img]');
-    const bigCaption = dialog?.querySelector<HTMLElement>('[data-lightbox-caption]');
-
-    if (dialog && big) {
-      root.querySelectorAll<HTMLButtonElement>('[data-zoom]').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          // Sin esto, el clic llega también al carrusel y cambia de foto.
-          event.stopPropagation();
-          big.src = btn.dataset.src ?? '';
-          big.alt = btn.dataset.alt ?? '';
-
-          const caption = btn.dataset.caption ?? '';
-          if (bigCaption) {
-            bigCaption.textContent = caption;
-            // Sin pie no se deja la píldora vacía flotando bajo la foto.
-            bigCaption.hidden = caption === '';
-          }
-
-          dialog.showModal();
-        });
-      });
-
-      dialog
-        .querySelector<HTMLButtonElement>('[data-lightbox-close]')
-        ?.addEventListener('click', () => dialog.close());
-
-      // Un clic fuera de la imagen tiene como destino el propio <dialog>.
-      dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) dialog.close();
-      });
-    }
-  });
-</script>
+          {img.caption && (
+            <figcaption class:list={['mt-4 text-center text-sm font-medium', tone.caption]}>
+              {img.caption}
+            </figcaption>
+          )}
+        </div>
+      </figure>
+    ))
+  }
+</CarouselShell>

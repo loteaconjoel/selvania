@@ -58,11 +58,15 @@ function readImages(form: FormData): Media[] {
 function readBullets(form: FormData): Bullet[] {
   return f
     .rows(form, 'bullet')
-    .map((row) => ({
-      icon: f.iconName(row.icon ?? ''),
-      title: row.title ?? '',
-      text: row.text ?? '',
-    }))
+    .map((row) => {
+      const src = f.mediaUrl(row.src ?? '');
+      return {
+        icon: f.iconName(row.icon ?? ''),
+        title: row.title ?? '',
+        text: row.text ?? '',
+        image: src ? { src, alt: row.alt ?? '' } : undefined,
+      };
+    })
     .filter((bullet) => bullet.title !== '');
 }
 

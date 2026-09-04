@@ -1,0 +1,130 @@
+---
+import type { Surface } from '../lib/surface';
+
+interface Props {
+  label: string;
+  surface?: Surface;
+  /** Añade el diálogo para ampliar. Solo lo necesita el carrusel de fotos. */
+  lightbox?: boolean;
+  /**
+   * Cómo se atenúa lo que no está centrado. Las tarjetas blancas solo se
+   * encogen: bajarles el brillo las vuelve grises y parecen rotas.
+   */
+  dim?: 'foto' | 'tarjeta';
+}
+
+const { label, surface = 'dark', lightbox = false, dim = 'foto' } = Astro.props;
+
+const atenuado =
+  dim === 'tarjeta'
+    ? { on: 'scale-100', off: 'scale-[0.97]' }
+    : { on: 'scale-100 brightness-100', off: 'scale-95 brightness-[0.55]' };
+
+// El armazón del carrusel: viewport, flechas, puntos y, si se pide, el diálogo
+// de ampliar. Las diapositivas las pone quien lo use, así que sirve igual para
+// fotos que para tarjetas de texto.
+const control = {
+  dark: 'bg-sv-lime text-sv-jungle-deep shadow-lg shadow-black/40 hover:brightness-110',
+  light: 'bg-sv-jungle-deep text-sv-cream shadow-lg shadow-sv-jungle-deep/30 hover:brightness-125',
+}[surface];
+
+const dots = {
+  dark: { on: 'bg-sv-lime', off: 'bg-sv-cream/30' },
+  light: { on: 'bg-sv-jungle-deep', off: 'bg-sv-jungle-deep/30' },
+}[surface];
+---
+
+<div
+  class="relative"
+  data-carousel
+  data-slide-on={atenuado.on}
+  data-slide-off={atenuado.off}
+  role="group"
+  aria-roledescription="carrusel"
+  aria-label={label}
+>
+  <div class="overflow-hidden" data-embla-viewport>
+    <div class="-ml-3 flex touch-pan-y sm:-ml-5">
+      <slot />
+    </div>
+  </div>
+
+  <div class="mt-7 flex items-center justify-center gap-4">
+    <button
+      type="button"
+      data-embla-prev
+      aria-label="Anterior"
+      class:list={[
+        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
+        control,
+      ]}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+        <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <div
+      class="flex items-center gap-2"
+      data-embla-dots
+      data-dot-on={dots.on}
+      data-dot-off={dots.off}
+    >
+    </div>
+
+    <button
+      type="button"
+      data-embla-next
+      aria-label="Siguiente"
+      class:list={[
+        'grid h-12 w-12 shrink-0 place-items-center rounded-full transition duration-200 active:scale-95',
+        control,
+      ]}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+        <path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </div>
+
+  {
+    lightbox && (
+      /* Se usa <dialog> nativo: trae gratis el cierre con Escape, el foco
+         atrapado dentro y el fondo oscurecido, sin librerías. */
+      <dialog
+        data-lightbox
+        class="m-auto max-h-[92dvh] max-w-[95vw] rounded-3xl bg-transparent p-0 backdrop:bg-black/85"
+      >
+        <figure class="relative m-0 flex flex-col items-center gap-4">
+          {/* Sin atributo src hasta que se abre: un src="" hace que el navegador
+              pida la propia página como si fuera una imagen. */}
+          <img
+            data-lightbox-img
+            alt=""
+            class="max-h-[76dvh] max-w-[95vw] rounded-3xl object-contain"
+          />
+          <figcaption
+            data-lightbox-caption
+            class="rounded-full bg-sv-jungle-deep/90 px-5 py-2 text-center text-sm font-medium text-sv-cream ring-1 ring-sv-cream/15"
+          />
+          <button
+            type="button"
+            data-lightbox-close
+            aria-label="Cerrar"
+            class="absolute top-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-sv-jungle-deep/80 text-sv-cream ring-1 ring-sv-cream/25 backdrop-blur-sm transition hover:bg-sv-jungle-deep"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-5 w-5">
+              <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
+            </svg>
+          </button>
+        </figure>
+      </dialog>
+    )
+  }
+</div>
+
+<script>
+  import { initCarousels } from '../lib/carousel-init';
+
+  initCarousels();
+</script>

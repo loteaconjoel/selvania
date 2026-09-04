@@ -25,6 +25,11 @@ export interface Bullet {
   icon: IconName;
   title: string;
   text: string;
+  /**
+   * Imagen del punto: la foto de la notaría, el documento escaneado. Es
+   * opcional, así que mientras no la haya la tarjeta se ve solo con su ícono.
+   */
+  image?: Media;
 }
 
 /**

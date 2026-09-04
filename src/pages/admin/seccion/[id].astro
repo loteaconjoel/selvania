@@ -540,23 +540,32 @@ const nombreVisible = block.type === 'marquee' ? block.label : block.title;
                 <Step
                   n={n('puntos')}
                   title="Puntos con ícono"
-                  where="Tarjetas en dos columnas bajo la descripción"
-                  description="Para quitar uno, marca Eliminar o deja su título vacío."
+                  where="Tarjetas que se deslizan de lado, con flechas y puntos debajo"
+                  description="Cada punto puede llevar una foto o un documento escaneado, que se podrá ampliar desde la web. Sin imagen, la tarjeta se ve solo con su ícono. Para quitar un punto, marca Eliminar o deja su título vacío."
                   badge={estado('puntos').texto}
                 >
                   <div class="space-y-4">
                     {withBlank(block.bullets).map(({ item, i }) => (
                       <div class={rowBox}>
                         <div class="flex flex-wrap gap-4">
-                          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
-                            <Icon name={item?.icon ?? 'escudo'} class="h-6 w-6" />
-                          </span>
+                          {item?.image?.src ? (
+                            <img
+                              src={item.image.src}
+                              alt=""
+                              class="h-24 w-32 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
+                            />
+                          ) : (
+                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sv-lime/10 text-sv-lime ring-1 ring-sv-lime/25">
+                              <Icon name={item?.icon ?? 'escudo'} class="h-6 w-6" />
+                            </span>
+                          )}
                           <div class="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
                             <Select
                               label="Ícono"
                               name={`bullet.${i}.icon`}
                               value={item?.icon ?? 'escudo'}
                               options={iconOptions}
+                              hint="Se ve cuando el punto no tiene imagen."
                             />
                             <Field
                               label={item ? `Punto ${i + 1}` : 'Añadir otro punto'}
@@ -571,6 +580,20 @@ const nombreVisible = block.type === 'marquee' ? block.label : block.title;
                               type="textarea"
                               rows={2}
                               wide
+                            />
+                            <Field
+                              label="Imagen del punto"
+                              name={`bullet.${i}.src`}
+                              value={item?.image?.src ?? ''}
+                              placeholder="https://.../media/notaria.jpg"
+                              hint="Foto de la notaría o documento escaneado. Opcional."
+                            />
+                            <Field
+                              label="Texto alternativo"
+                              name={`bullet.${i}.alt`}
+                              value={item?.image?.alt ?? ''}
+                              placeholder="Escritura pública firmada ante notario"
+                              hint="Describe lo que se ve en la imagen."
                             />
                           </div>
                         </div>
@@ -598,6 +621,8 @@ const nombreVisible = block.type === 'marquee' ? block.label : block.title;
                       </div>
                     ))}
                   </div>
+
+                  <MediaPicker />
                 </Step>
               </div>
             )}
