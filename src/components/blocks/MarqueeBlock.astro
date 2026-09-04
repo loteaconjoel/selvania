@@ -56,14 +56,65 @@ const copies = [0, 1];
     }
   }
 
-  /* Sin animación, la franja se vuelve deslizable a mano. */
+  /* Con el movimiento reducido activado en el sistema, la franja deja de
+     desplazarse. Antes se quedaba quieta a media frase, que parece un fallo;
+     ahora las frases se reparten en varias líneas y se lee como una banda
+     estática a propósito. La copia duplicada, que solo existe para que el
+     bucle no tenga costura, sobra aquí. */
   @media (prefers-reduced-motion: reduce) {
     .sv-marquee-track {
       animation: none !important;
+      width: auto;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    [data-marquee] {
-      overflow-x: auto;
+    .sv-marquee-track > ul[aria-hidden='true'] {
+      display: none;
+    }
+
+    /* La lista lleva shrink-0 para que el bucle no la comprima. Aquí estorba:
+       sin poder encoger se sale del contenedor y el recorte deja ver una sola
+       frase. Se le devuelve la capacidad de encoger para que reparta las
+       frases en varias líneas. */
+    .sv-marquee-track > ul {
+      flex-shrink: 1;
+      min-width: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.25rem 0;
+    }
+
+    /* Los puntos separan frases dentro de una tira continua. Apilada en
+       líneas no separan nada y además sobresalen del borde. */
+    .sv-marquee-track li > span[aria-hidden='true'] {
+      display: none;
     }
   }
 </style>
+
+<script>
+  // iOS pausa las animaciones CSS cuando la página pasa a segundo plano —al
+  // cambiar de app o bloquear el móvil— y al volver no siempre las reanuda: la
+  // franja se queda congelada. Aquí se comprueba cada vez que la página
+  // recupera el foco y se le vuelve a dar marcha si quedó en pausa.
+  //
+  // Se usa getAnimations() en lugar de reiniciar la animación para que retome
+  // justo donde estaba, sin dar un salto visible.
+  function reanudarFranjas() {
+    document.querySelectorAll<HTMLElement>('[data-marquee] .sv-marquee-track').forEach((pista) => {
+      pista.getAnimations().forEach((animacion) => {
+        if (animacion.playState === 'paused') animacion.play();
+      });
+    });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) reanudarFranjas();
+  });
+
+  // pageshow cubre la vuelta atrás desde la caché del navegador, que en Safari
+  // restaura la página tal cual estaba, animaciones pausadas incluidas.
+  window.addEventListener('pageshow', reanudarFranjas);
+  window.addEventListener('focus', reanudarFranjas);
+</script>
