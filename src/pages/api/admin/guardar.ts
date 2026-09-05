@@ -44,9 +44,9 @@ function readCta(form: FormData): Cta | undefined {
   };
 }
 
-function readImages(form: FormData): Media[] {
+function readImages(form: FormData, prefix = 'img'): Media[] {
   return f
-    .rows(form, 'img')
+    .rows(form, prefix)
     .map((row) => ({
       src: f.mediaUrl(row.src ?? ''),
       alt: row.alt ?? '',
@@ -97,6 +97,7 @@ function newBlock(type: f.BlockType): Block {
         ...common,
         type: 'showcase',
         title: 'Nueva sección con video y carrusel',
+        openingImages: [],
         source: { kind: 'youtube', youtubeId: '' },
         heading: '',
         images: [],
@@ -238,11 +239,7 @@ export const POST: APIRoute = async ({ request }) => {
           block.videoHeading = f.text(form, 'videoHeading') || undefined;
           block.heading = f.text(form, 'heading') || undefined;
           block.images = readImages(form);
-
-          const bannerSrc = f.mediaUrl(f.text(form, 'banner.src'));
-          block.banner = bannerSrc
-            ? { src: bannerSrc, alt: f.text(form, 'banner.alt') }
-            : undefined;
+          block.openingImages = readImages(form, 'apertura');
         } else {
           block.bullets = readBullets(form);
         }

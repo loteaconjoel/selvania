@@ -30,7 +30,13 @@ function contenido(block: Block): string[] {
     return partes;
   }
 
-  if (block.type === 'showcase' && block.banner?.src) partes.push('imagen de apertura');
+  if (block.type === 'showcase' && block.openingImages.length > 0) {
+    partes.push(
+      block.openingImages.length === 1
+        ? '1 foto de apertura'
+        : `${block.openingImages.length} fotos de apertura`,
+    );
+  }
 
   if (block.type === 'video' || block.type === 'showcase') {
     partes.push(

@@ -20,12 +20,12 @@ const variant = block.id.charCodeAt(0) % 3;
 <section
   id={block.id}
   class:list={[
-    'relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:py-24',
+    'relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:py-32',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
   {alt && <JungleBackdrop variant={variant} />}
-  <div class="relative mx-auto max-w-6xl">
+  <div class="relative mx-auto max-w-6xl xl:max-w-7xl">
     <SectionHeader
       eyebrow={block.eyebrow}
       title={block.title}
@@ -33,7 +33,7 @@ const variant = block.id.charCodeAt(0) % 3;
       surface={surface}
     />
 
-    <div class="mx-auto mt-10 max-w-3xl">
+    <div class="mx-auto mt-10 max-w-3xl lg:max-w-4xl xl:max-w-5xl">
       <VideoPlayer
         source={block.source}
         poster={block.poster}

@@ -28,14 +28,14 @@ const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream
 <section
   id={block.id}
   class:list={[
-    'relative overflow-hidden py-16 sm:py-20 lg:py-24',
+    'relative overflow-hidden py-16 sm:py-20 lg:py-32',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
   {alt && <JungleBackdrop variant={variant} />}
 
   <div class="relative px-4 sm:px-6">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-6xl xl:max-w-7xl">
       <SectionHeader
         eyebrow={block.eyebrow}
         title={block.title}
@@ -46,19 +46,18 @@ const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream
   </div>
 
   {
-    block.banner && (
-      /* Va fuera de los contenedores con padding, así que en móvil llega de
-         borde a borde. En pantallas grandes se limita el ancho: la pieza es
-         vertical y a sangre en un monitor mediría más de dos mil píxeles de
-         alto. Se muestra entera, sin recortar, porque lleva texto dentro. */
-      <div class="relative mt-10">
-        <img
-          src={block.banner.src}
-          alt={block.banner.alt}
-          loading="lazy"
-          decoding="async"
-          class="mx-auto block w-full sm:max-w-md sm:rounded-3xl"
-        />
+    block.openingImages.length > 0 && (
+      /* Carrusel de apertura: mismas medidas y márgenes que el de abajo, para
+         que los dos de la sección se lean como uno solo repetido y no como dos
+         componentes distintos. */
+      <div class="relative mt-10 px-4 sm:px-6">
+        <div class="mx-auto max-w-6xl xl:max-w-7xl">
+          <Carousel
+            images={block.openingImages}
+            label={`${block.title}: apertura`}
+            surface={surface}
+          />
+        </div>
       </div>
     )
   }
@@ -79,7 +78,7 @@ const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream
   }
 
   <div class:list={['relative px-4 sm:px-6', block.videoHeading ? 'mt-8' : 'mt-10']}>
-    <div class="mx-auto max-w-3xl">
+    <div class="mx-auto max-w-3xl lg:max-w-4xl xl:max-w-5xl">
       <VideoPlayer
         source={block.source}
         poster={block.poster}
@@ -107,7 +106,7 @@ const headingTone = surface === 'light' ? 'text-sv-jungle-deep' : 'text-sv-cream
   {
     block.images.length > 0 && (
       <div class:list={['relative px-4 sm:px-6', block.heading ? 'mt-8' : 'mt-14']}>
-        <div class="mx-auto max-w-6xl">
+        <div class="mx-auto max-w-6xl xl:max-w-7xl">
           <Carousel
             images={block.images}
             label={block.heading ?? block.title}

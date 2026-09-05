@@ -72,7 +72,7 @@ const nombres: Record<string, string> = {
   nombre: 'Nombre interno',
   frases: 'Frases que se desplazan',
   encabezado: 'Antetítulo, título y descripción',
-  apertura: 'Imagen de apertura',
+  apertura: 'Carrusel de apertura',
   tituloVideo: 'Encabezado sobre el video',
   video: 'Video',
   tituloFotos: 'Encabezado sobre las fotos',
@@ -109,7 +109,9 @@ function estadoDe(block: Block, clave: string): { texto: string; lleno: boolean 
 
   if (block.type === 'showcase') {
     if (clave === 'apertura') {
-      return block.banner?.src ? { texto: 'Puesta', lleno: true } : { texto: 'Sin imagen', lleno: false };
+      return block.openingImages.length > 0
+        ? { texto: `${block.openingImages.length} fotos`, lleno: true }
+        : { texto: 'Sin fotos', lleno: false };
     }
     if (clave === 'tituloVideo') {
       return block.videoHeading ? { texto: block.videoHeading, lleno: true } : vacio;
@@ -362,35 +364,74 @@ const nombreVisible = block.type === 'marquee' ? block.label : block.title;
               <div id="paso-apertura">
                 <Step
                   n={n('apertura')}
-                  title="Imagen de apertura"
-                  where="A todo el ancho, justo antes del video"
-                  description="Pensada para una pieza ya diseñada, como un flyer: se muestra entera y sin recortar. Déjala vacía para no mostrarla."
+                  title="Carrusel de apertura"
+                  where="Justo bajo la descripción, antes del video"
+                  description="Un segundo carrusel para abrir la sección. Se ve igual que el de abajo. Déjalo sin fotos para no mostrarlo."
                   badge={estado('apertura').texto}
                   optional
                 >
-                  <div class="flex flex-wrap gap-4">
-                    {block.banner?.src && (
-                      <img
-                        src={block.banner.src}
-                        alt=""
-                        class="h-32 w-24 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
-                      />
-                    )}
-                    <div class="grid min-w-0 flex-1 gap-4">
-                      <Field
-                        label="Ruta de la imagen"
-                        name="banner.src"
-                        value={block.banner?.src ?? ''}
-                        placeholder="https://.../media/principal.webp"
-                      />
-                      <Field
-                        label="Texto alternativo"
-                        name="banner.alt"
-                        value={block.banner?.alt ?? ''}
-                        placeholder="Qué dice y qué se ve en la imagen"
-                        hint="Si la imagen lleva texto, escríbelo aquí: es lo único que leen Google y los lectores de pantalla."
-                      />
-                    </div>
+                  <div class="space-y-4">
+                    {withBlank(block.openingImages).map(({ item, i }) => (
+                      <div class={rowBox}>
+                        <div class="flex flex-wrap gap-4">
+                          {item?.src ? (
+                            <img
+                              src={item.src}
+                              alt=""
+                              class="h-24 w-32 shrink-0 rounded-lg object-cover ring-1 ring-sv-lime/20"
+                            />
+                          ) : (
+                            <span class="grid h-24 w-32 shrink-0 place-items-center rounded-lg bg-sv-cream/5 text-xs text-sv-cream/35 ring-1 ring-dashed ring-sv-lime/20">
+                              Nueva
+                            </span>
+                          )}
+                          <div class="grid min-w-0 flex-1 gap-4">
+                            <Field
+                              label={item ? `Foto ${i + 1}` : 'Añadir otra foto'}
+                              name={`apertura.${i}.src`}
+                              value={item?.src ?? ''}
+                              placeholder="https://.../media/foto.jpg"
+                              hint={item ? 'Cambia la ruta para reemplazar esta foto.' : undefined}
+                            />
+                            <Field
+                              label="Texto alternativo"
+                              name={`apertura.${i}.alt`}
+                              value={item?.alt ?? ''}
+                              placeholder="Vista aérea del terreno"
+                              hint="Describe lo que se ve. Se lee si la foto no carga."
+                            />
+                            <Field
+                              label="Pie de foto"
+                              name={`apertura.${i}.caption`}
+                              value={item?.caption ?? ''}
+                              placeholder="Cítricos en el terreno"
+                              hint="El texto que aparece debajo de la foto."
+                            />
+                          </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center gap-5">
+                          <label class="flex items-center gap-2 text-xs text-sv-cream/55">
+                            Orden
+                            <input
+                              type="number"
+                              name={`apertura.${i}.orden`}
+                              value={String(i)}
+                              class={orderInput}
+                            />
+                          </label>
+                          {item && (
+                            <label class={deleteLabel}>
+                              <input
+                                type="checkbox"
+                                name={`apertura.${i}.borrar`}
+                                class="h-4 w-4 accent-red-400"
+                              />
+                              Eliminar
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <MediaPicker />

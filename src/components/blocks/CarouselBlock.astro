@@ -20,13 +20,13 @@ const variant = block.id.charCodeAt(0) % 3;
 <section
   id={block.id}
   class:list={[
-    'relative overflow-hidden py-16 sm:py-20 lg:py-24',
+    'relative overflow-hidden py-16 sm:py-20 lg:py-32',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
   {alt && <JungleBackdrop variant={variant} />}
   <div class="relative px-4 sm:px-6">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-6xl xl:max-w-7xl">
       <SectionHeader
         eyebrow={block.eyebrow}
         title={block.title}
@@ -42,7 +42,7 @@ const variant = block.id.charCodeAt(0) % 3;
       lo que asoma es la siguiente, por la derecha, que es lo que invita a
       deslizar. */}
   <div class="relative mt-10 px-4 sm:px-6">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-6xl xl:max-w-7xl">
       <Carousel images={block.images} label={block.title} surface={surface} />
     </div>
   </div>

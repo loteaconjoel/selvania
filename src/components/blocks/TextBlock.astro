@@ -38,14 +38,14 @@ const card = {
 <section
   id={block.id}
   class:list={[
-    'relative overflow-hidden py-16 sm:py-20 lg:py-24',
+    'relative overflow-hidden py-16 sm:py-20 lg:py-32',
     alt ? 'bg-sv-jungle' : 'bg-sv-jungle-deep',
   ]}
 >
   {alt && <JungleBackdrop variant={variant} />}
 
   <div class="relative px-4 sm:px-6">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-6xl xl:max-w-7xl">
       <SectionHeader
         eyebrow={block.eyebrow}
         title={block.title}
@@ -59,11 +59,11 @@ const card = {
       comparten sus márgenes: la primera tarjeta arranca en el mismo contorno
       que el título y lo que asoma por la derecha es la siguiente. */}
   <div class="relative mt-10 px-4 sm:px-6">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-6xl xl:max-w-7xl">
       <CarouselShell label={block.title} surface={surface} dim="tarjeta" lightbox>
         {
           block.bullets.map((bullet) => (
-            <article class="flex min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-[56%] sm:pl-5 lg:basis-[42%]">
+            <article class="flex min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-[56%] sm:pl-5 lg:basis-[36%] xl:basis-[31%]">
               {/* El escalado va en este envoltorio y no en el <article>: si se
                   aplica al artículo, su relleno se encoge con él y la tarjeta
                   vecina se desplaza encima de la activa. */}

@@ -96,10 +96,25 @@ export const defaultContent: SiteContent = {
       title: 'Conoce Selvania Park',
       description:
         'Un terreno amplio dividido en lotes, en el corazón de la selva central. Míralo primero en video y después en fotos del lugar.',
-      banner: {
-        src: `${FOTO}/principal.webp`,
-        alt: 'Urbanización Los Cocos: lotes de 190 m² en el distrito de Sangani, a 6 min del parque de Pichanaki. Compra y venta notarial, con luz y agua. Precio S/ 40,000 con facilidades.',
-      },
+      // Carrusel de apertura. Con solo cuatro fotos se repiten entre secciones;
+      // cuando lleguen más, cada carrusel llevará las suyas.
+      openingImages: [
+        {
+          src: `${FOTO}/piscina.jpg`,
+          alt: 'Piscina con toboganes, palmeras y sombrillas',
+          caption: 'Zona recreativa',
+        },
+        {
+          src: `${FOTO}/huerto.jpg`,
+          alt: 'Huerto de naranjos con cerros y palmeras al fondo',
+          caption: 'El huerto, con el cerro al fondo',
+        },
+        {
+          src: `${FOTO}/movimiento-tierras.jpg`,
+          alt: 'Retroexcavadora trabajando junto a un montón de piedras de río',
+          caption: 'Trabajos en marcha',
+        },
+      ],
       videoHeading: 'Recorre el proyecto por dentro',
       source: { kind: 'youtube', youtubeId: 'f7Zs_RPt6Z0' },
       heading: 'Así se ve hoy el proyecto',
