@@ -37,3 +37,7 @@ public/uploads/
 # fotos originales de entrada: se procesan y suben a Supabase, no al repo
 fotos-nuevas/*
 !fotos-nuevas/LEEME.md
+
+# Cookies de sesión de las pruebas con curl. Nunca al repositorio: son
+# credenciales de administrador válidas.
+cookies.txt
